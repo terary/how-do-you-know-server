@@ -1,0 +1,311 @@
+{
+  "questions": [
+    {
+      "questionId": "100004",
+      "userPromptType": "text",
+      "userResponseType": "free-text-255",
+      "userPromptText": "The text to present the question.  This question will have small free form response with no correct answers.",
+      "userResponseHistory": [
+        {
+          "systemUserResponseId": 123,
+          "systemAcceptTimeUTC": 0,
+          "userResponse": {
+            "text": "Pretty much anything is acceptable."
+          }
+        },
+        {
+          "systemUserResponseId": 124,
+          "systemAcceptTimeUTC": 1,
+          "userResponse": {
+            "text": "Pretty much anything is acceptable. II"
+          }
+        }
+      ]
+    },
+    {
+      "questionId": "100010",
+      "userPromptType": "text",
+      "userResponseType": "any-of",
+      "answerFodderId": "fodderId_0002x",
+      "userPromptText": "US States that begin with the letter 'T'?",
+      "validAnswers": [
+        {
+          "value": "Tennessee"
+        },
+        {
+          "value": "Texas"
+        }
+      ],
+      "choices": [
+        {
+          "labelText": "Tennessee",
+          "value": "Tennessee"
+        },
+        {
+          "labelText": "Texas",
+          "value": "Texas"
+        },
+        {
+          "labelText": "California",
+          "value": "California"
+        },
+        {
+          "labelText": "Florida",
+          "value": "Florida"
+        },
+        {
+          "labelText": "Maine",
+          "value": "Maine"
+        },
+        {
+          "labelText": "Colorado",
+          "value": "Colorado"
+        }
+      ],
+      "userResponseHistory": [
+        {
+          "systemUserResponseId": 123,
+          "systemAcceptTimeUTC": 0,
+          "userResponse": {
+            "selectedOptions": ["Colorado", "Florida"]
+          }
+        },
+        {
+          "systemUserResponseId": 124,
+          "systemAcceptTimeUTC": 1,
+          "userResponse": {
+            "selectedOptions": ["Colorado", "Florida", "Texas"]
+          }
+        }
+      ]
+    },
+
+    {
+      "questionId": "100003",
+      "userPromptType": "text",
+      "userResponseType": "one-of-4",
+      "answerFodderId": "fodderId_0002",
+      "userPromptText": "When was Humphrey Bogart born?",
+      "validAnswers": [
+        {
+          "value": "December 25, 1899"
+        },
+        {
+          "value": "Christmas day - 1899"
+        }
+      ],
+      "choices": [
+        {
+          "labelText": "Christmas day - 1899",
+          "value": "Christmas day - 1899"
+        },
+        {
+          "labelText": "December 25, 2021",
+          "value": "December 25, 2021"
+        },
+        {
+          "labelText": "December 25, 1899",
+          "value": "December 25, 1899"
+        },
+        {
+          "labelText": "June 29, 1974",
+          "value": "June 29, 1974"
+        }
+      ],
+      "userResponseHistory": [
+        {
+          "systemUserResponseId": 123,
+          "systemAcceptTimeUTC": 0,
+          "userResponse": {
+            "text": "June 29, 1974"
+          }
+        },
+        {
+          "systemUserResponseId": 124,
+          "systemAcceptTimeUTC": 1,
+          "userResponse": {
+            "text": "June 29, 1974"
+          }
+        }
+      ]
+    },
+
+    {
+      "questionId": "100001",
+      "userPromptType": "text",
+      "userResponseType": "one-of-2",
+      "validAnswers": [
+        {
+          "value": "True"
+        }
+      ],
+      "userPromptText": "This is a true/false question?",
+      "choices": [
+        {
+          "labelText": "True",
+          "value": "True"
+        },
+        {
+          "labelText": "False",
+          "value": "False"
+        }
+      ]
+    },
+    {
+      "questionId": "100002",
+      "userPromptType": "multimedia",
+      "userResponseType": "one-of-4",
+      "validAnswers": [
+        {
+          "value": "December 25, 1899"
+        }
+      ],
+      "answerFodderId": "fodderId_0002",
+      "instructionText": "Specific to the exercise. 'which of these are fruit?'",
+      "userPromptText": "This is a true/false question?",
+      "links": [
+        {
+          "mediaContentType": "link/image",
+          "height": 300,
+          "width": 300,
+          "url": "https://media.gettyimages.com/id/97766657/sv/foto/young-boy-with-goofy-expression.jpg?s=612x612&w=gi&k=20&c=flo9qRvwhyKTcV4Ms1lrzfeGBwzHs7A8IrrOx6NTQ1U=",
+          "specialInstructionText": "Specific to the file, displayed to use"
+        }
+      ],
+      "choices": [
+        {
+          "labelText": "Christmas day - 1899",
+          "value": "Christmas day - 1899"
+        },
+        {
+          "labelText": "December 25, 2021",
+          "value": "December 25, 2021"
+        },
+        {
+          "labelText": "December 25, 1899",
+          "value": "December 25, 1899"
+        },
+        {
+          "labelText": "June 29, 1974",
+          "value": "June 29, 1974"
+        }
+      ]
+    },
+    {
+      "questionId": "100003b",
+      "userPromptType": "text",
+      "userResponseType": "one-of-4",
+      "answerFodderId": "fodderId_0002",
+      "userPromptText": "When was Humphrey Bogart born?",
+      "validAnswers": [
+        {
+          "value": "December 25, 1899"
+        },
+        {
+          "value": "Christmas day - 1899"
+        }
+      ],
+      "choices": [
+        {
+          "labelText": "Christmas day - 1899",
+          "value": "Christmas day - 1899"
+        },
+        {
+          "labelText": "December 25, 2021",
+          "value": "December 25, 2021"
+        },
+        {
+          "labelText": "December 25, 1899",
+          "value": "December 25, 1899"
+        },
+        {
+          "labelText": "June 29, 1974",
+          "value": "June 29, 1974"
+        }
+      ],
+      "userResponseHistory": null
+    },
+    {
+      "questionId": "100005",
+      "userPromptType": "multimedia",
+      "userResponseType": "one-of-2",
+      "instructionText": "Specific to the exercise. 'which of these are fruit?'",
+      "validAnswers": [
+        {
+          "value": "True"
+        }
+      ],
+      "choices": [
+        {
+          "labelText": "True",
+          "value": "True"
+        },
+        {
+          "labelText": "False",
+          "value": "False"
+        }
+      ],
+      "links": [
+        {
+          "mediaContentType": "link/image",
+          "height": 300,
+          "width": 300,
+          "url": "https://media.gettyimages.com/id/97766657/sv/foto/young-boy-with-goofy-expression.jpg?s=612x612&w=gi&k=20&c=flo9qRvwhyKTcV4Ms1lrzfeGBwzHs7A8IrrOx6NTQ1U=",
+          "specialInstructionText": "Specific to the file, displayed to use"
+        }
+      ]
+    },
+    {
+      "questionId": "100006",
+      "userPromptType": "multimedia",
+      "userResponseType": "free-text-255",
+      "instructionText": "Do both an image and a video appear?",
+      "links": [
+        {
+          "mediaContentType": "link/youtube",
+          "height": 300,
+          "width": 300,
+          "url": "https://youtu.be/VbwyR5jLSUQ",
+          "specialInstructionText": "Specific to the file, displayed to use"
+        },
+        {
+          "mediaContentType": "link/image",
+          "height": 300,
+          "width": 300,
+          "url": "https://media.gettyimages.com/id/97766657/sv/foto/young-boy-with-goofy-expression.jpg?s=612x612&w=gi&k=20&c=flo9qRvwhyKTcV4Ms1lrzfeGBwzHs7A8IrrOx6NTQ1U=",
+          "specialInstructionText": "Specific to the file, displayed to use"
+        }
+      ]
+    },
+    {
+      "questionId": "100007",
+      "userPromptType": "multimedia",
+      "userResponseType": "one-of-2",
+      "instructionText": "Is this a video?",
+      "validAnswers": [
+        {
+          "value": "True"
+        }
+      ],
+      "choices": [
+        {
+          "labelText": "True",
+          "value": "True"
+        },
+        {
+          "labelText": "False",
+          "value": "False"
+        }
+      ],
+      "links": [
+        {
+          "mediaContentType": "link/youtube",
+          "height": 300,
+          "width": 300,
+          "url": "https://youtu.be/dQw4w9WgXcQ",
+          "specialInstructionText": "Watch this video carefully"
+        }
+      ]
+    }
+  ]
+}
