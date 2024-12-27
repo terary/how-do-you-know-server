@@ -8,55 +8,12 @@ import {
   Delete,
   Logger,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { DevDebugService } from './dev-debug.service';
 import { CreateDevDebugDto } from './dto/create-dev-debug.dto';
 import { UpdateDevDebugDto } from './dto/update-dev-debug.dto';
-`
-  So this is working pretty much.
-
-  We have an issue with 'userResponse' and 'userResponse[Wrapper]'
-
-  Current the question object looks like
-{
-  questionId: "",
-  ...
-  userResponse: {
-    userResponse: {
-      text: '...'
-    }
-  }  
-
-}
-
-We want to maintain only one answer (or most recent answer)?
-We want to maintain an 'updatedCount' to identify questions that have to 
-be answered multiple times... I am pretty sure
-
-
-But the questions documents should only contain
-{
-{
-  questionId: "",
-  ...
-  userResponse: {
-      text: '...'
-    // maybe some meta data...
-  }  
-
-}
-
-}
-
-
-
-at a minimum the update answer should respond with only meta data specific to that response
-
-
-
-
-
-`;
+import { AuthGuard } from '../auth/auth.guard';
 
 import {
   DevDebugUpdateQuestionTextDto,
@@ -101,6 +58,27 @@ export class DevDebugController {
 
     return [];
   }
+
+  @Get('/auth/user-answers/questionnaire')
+  @UseGuards(AuthGuard)
+  getQuestionnaireAuth() {
+    const questionnaire = this.devDebugService.createNewQuestionnaire(
+      'questionTemplateId',
+      'userId',
+    );
+
+    this.logger.log({
+      getQuestionnaire: {
+        cachedUserResponse,
+        questionsJson,
+        // updateDto: JSON.stringify(updateDto),
+      },
+    });
+    // return questionsJson;
+
+    return questionnaire;
+  }
+
   @Get('/user-answers/questionnaire')
   getQuestionnaire() {
     const questionnaire = this.devDebugService.createNewQuestionnaire(
