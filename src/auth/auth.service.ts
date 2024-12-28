@@ -1,14 +1,29 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { ApiProperty } from '@nestjs/swagger';
 
-export type SignOutDto = {
+export class SignOutDto {
+  @ApiProperty({
+    description: 'JWT access token',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  })
   access_token: string;
-};
-export type SignInDto = {
+}
+
+export class SignInDto {
+  @ApiProperty({
+    description: 'Username for authentication',
+    example: 'john',
+  })
   username: string;
+
+  @ApiProperty({
+    description: 'Password for authentication',
+    example: 'changeme',
+  })
   password: string;
-};
+}
 
 @Injectable()
 export class AuthService {
