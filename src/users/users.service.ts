@@ -17,6 +17,11 @@ export class UsersService {
       username: 'maria',
       password: 'guess',
     },
+    {
+      userId: 3,
+      username: 'username',
+      password: 'password',
+    },
   ];
 
   create(createUserDto: CreateUserDto) {
