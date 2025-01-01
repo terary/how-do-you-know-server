@@ -1,6 +1,165 @@
 {
   "questions": [
     {
+      "questionId": "100001-20241228",
+      "userPromptType": "text",
+      "userResponseType": "one-of-2",
+      "validAnswers": [
+        {
+          "value": "True"
+        }
+      ],
+      "userPromptText": "This is a true/false question?",
+      "choices": [
+        {
+          "labelText": "True",
+          "value": "True"
+        },
+        {
+          "labelText": "False",
+          "value": "False"
+        }
+      ],
+      "userResponseHistory": [
+        {
+          "systemUserResponseId": 123,
+          "systemAcceptTimeUTC": 0,
+          "userResponseType": "one-of-2",
+          "userResponse": {
+            "text": "True"
+          }
+        },
+        {
+          "systemUserResponseId": 124,
+          "systemAcceptTimeUTC": 1,
+          "userResponseType": "one-of-2",
+          "userResponse": {
+            "text": "False"
+          }
+        }
+      ]
+    },
+
+    {
+      "questionId": "100003bc",
+      "userPromptType": "text",
+      "userResponseType": "one-of-4",
+      "answerFodderId": "fodderId_0002",
+      "userPromptText": "When was Humphrey Bogart born?",
+      "validAnswers": [
+        {
+          "value": "December 25, 1899"
+        },
+        {
+          "value": "Christmas day - 1899"
+        }
+      ],
+      "choices": [
+        {
+          "labelText": "Christmas day - 1899",
+          "value": "Christmas day - 1899"
+        },
+        {
+          "labelText": "December 25, 2021",
+          "value": "December 25, 2021"
+        },
+        {
+          "labelText": "December 25, 1899",
+          "value": "December 25, 1899"
+        },
+        {
+          "labelText": "June 29, 1974",
+          "value": "June 29, 1974"
+        }
+      ],
+      "userResponseHistory": [
+        {
+          "systemUserResponseId": 123,
+          "systemAcceptTimeUTC": 0,
+          "userResponseType": "one-of-4",
+          "userResponse": {
+            "text": "June 29, 1974"
+          }
+        },
+        {
+          "systemUserResponseId": 124,
+          "systemAcceptTimeUTC": 1,
+          "userResponseType": "one-of-4",
+          "userResponse": {
+            "text": "June 29, 1974"
+          }
+        }
+      ]
+    },
+
+    {
+      "questionId": "100010b",
+      "userPromptType": "text",
+      "userResponseType": "any-of",
+      "answerFodderId": "fodderId_0002x",
+      "userPromptText": "US States that begin with the letter 'T'?",
+      "validAnswers": [
+        {
+          "value": "Tennessee"
+        },
+        {
+          "value": "Texas"
+        }
+      ],
+      "choices": [
+        {
+          "labelText": "Tennessee",
+          "value": "Tennessee"
+        },
+        {
+          "labelText": "Texas",
+          "value": "Texas"
+        },
+        {
+          "labelText": "California",
+          "value": "California"
+        },
+        {
+          "labelText": "Florida",
+          "value": "Florida"
+        },
+        {
+          "labelText": "Maine",
+          "value": "Maine"
+        },
+        {
+          "labelText": "Colorado",
+          "value": "Colorado"
+        }
+      ],
+      "userResponseHistory": [
+        {
+          "systemUserResponseId": 123,
+          "systemAcceptTimeUTC": 0,
+          "userResponseType": "any-of",
+          "userResponse": {
+            "selectedOptions": ["Colorado", "Florida"]
+          }
+        },
+        {
+          "systemUserResponseId": 124,
+          "systemAcceptTimeUTC": 1,
+          "userResponseType": "any-of",
+          "userResponse": {
+            "selectedOptions": ["Colorado", "Florida", "Texas"]
+          }
+        }
+      ]
+    },
+
+    {
+      "questionId": "100004b",
+      "userPromptType": "text",
+      "userResponseType": "free-text-255",
+      "userPromptText": "The text to present the question.  This question will have small free form response with no correct answers.",
+      "userResponseHistory": null
+    },
+    {
       "questionId": "100004",
       "userPromptType": "text",
       "userResponseType": "free-text-255",
@@ -9,6 +168,7 @@
         {
           "systemUserResponseId": 123,
           "systemAcceptTimeUTC": 0,
+          "userResponseType": "free-text-255",
           "userResponse": {
             "text": "Pretty much anything is acceptable."
           }
@@ -16,6 +176,7 @@
         {
           "systemUserResponseId": 124,
           "systemAcceptTimeUTC": 1,
+          "userResponseType": "free-text-255",
           "userResponse": {
             "text": "Pretty much anything is acceptable. II"
           }
@@ -66,6 +227,7 @@
         {
           "systemUserResponseId": 123,
           "systemAcceptTimeUTC": 0,
+          "userResponseType": "any-of",
           "userResponse": {
             "selectedOptions": ["Colorado", "Florida"]
           }
@@ -73,6 +235,7 @@
         {
           "systemUserResponseId": 124,
           "systemAcceptTimeUTC": 1,
+          "userResponseType": "any-of",
           "userResponse": {
             "selectedOptions": ["Colorado", "Florida", "Texas"]
           }
@@ -116,6 +279,7 @@
         {
           "systemUserResponseId": 123,
           "systemAcceptTimeUTC": 0,
+          "userResponseType": "one-of-4",
           "userResponse": {
             "text": "June 29, 1974"
           }
@@ -123,6 +287,7 @@
         {
           "systemUserResponseId": 124,
           "systemAcceptTimeUTC": 1,
+          "userResponseType": "one-of-4",
           "userResponse": {
             "text": "June 29, 1974"
           }

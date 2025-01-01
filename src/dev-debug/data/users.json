@@ -1,0 +1,34 @@
+{
+  "userList": [
+    {
+      "userId": 1,
+      "username": "john",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@example.com",
+      "createdAt": "2022-01-01T00:00:00.000Z",
+      "updatedAt": "2022-01-01T00:00:00.000Z",
+      "password": "changeme"
+    },
+    {
+      "userId": 2,
+      "username": "maria",
+      "firstName": "Maria",
+      "lastName": "Rodriguez",
+      "email": "maria.rodriguez@example.com",
+      "createdAt": "2022-01-02T00:00:00.000Z",
+      "updatedAt": "2022-01-02T00:00:00.000Z",
+      "password": "guess"
+    },
+    {
+      "userId": 3,
+      "username": "username",
+      "firstName": "Default",
+      "lastName": "User",
+      "email": "default.user@example.com",
+      "createdAt": "2022-01-03T00:00:00.000Z",
+      "updatedAt": "2022-01-03T00:00:00.000Z",
+      "password": "password"
+    }
+  ]
+}

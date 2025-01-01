@@ -7,15 +7,19 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
+            "name": "Debug Nest Framework",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+              "run",
+              "start:debug",
+              "--",
+              "--inspect-brk"
             ],
-            "program": "${workspaceFolder}/src/dev-debug/dev-debug.service.spec.ts",
-            "preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ]
+            "autoAttachChildProcesses": true,
+            "restart": true,
+            "sourceMaps": true,
+            "stopOnEntry": false,
+            "console": "integratedTerminal",
         },
         {
             // https://jestjs.io/docs/troubleshooting

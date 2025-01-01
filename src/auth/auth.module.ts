@@ -11,7 +11,7 @@ import { jwtConstants } from './constants';
     JwtModule.register({
       global: true,
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '600s' }, // *tmc* 10 minutes to time out... Is that a good idea?
     }),
   ],
   providers: [AuthService],
