@@ -14,6 +14,9 @@ import { DevDebugService } from './dev-debug.service';
 import { CreateDevDebugDto } from './dto/create-dev-debug.dto';
 import { UpdateDevDebugDto } from './dto/update-dev-debug.dto';
 import { AuthGuard } from '../auth/auth.guard';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
 
 import {
   DevDebugUpdateQuestionTextDto,
@@ -27,7 +30,17 @@ const cachedUserResponse: any[] = [];
 export class DevDebugController {
   private readonly logger = new Logger(DevDebugController.name);
 
-  constructor(private readonly devDebugService: DevDebugService) {}
+  constructor(
+    private readonly devDebugService: DevDebugService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
+
+  @Get('test-database')
+  async testDatabase() {
+    const userCount = await this.userRepository.count();
+    return { userCount };
+  }
 
   @Post()
   create(@Body() createDevDebugDto: CreateDevDebugDto) {
