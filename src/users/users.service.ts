@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+  Logger,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { TAuthenticatedUser } from './types';
@@ -9,6 +14,8 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -31,11 +38,19 @@ export class UsersService implements OnModuleInit {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    this.logger.debug(`Creating user: ${createUserDto.username}`);
+
+    // Hash the password if it's not already hashed
+    if (!createUserDto.password.startsWith('$2b$')) {
+      createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
+    }
+
     const user = this.usersRepository.create({
       ...createUserDto,
-      roles: ['user', 'public'],
+      roles: createUserDto.roles || ['user', 'public'],
     });
-    console.log({ userSave: user });
+
+    this.logger.debug(`Saving user with roles: ${user.roles.join(', ')}`);
     return this.usersRepository.save(user);
   }
 

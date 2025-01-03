@@ -17,8 +17,8 @@ async function login() {
   console.log('\nAttempting login...');
   try {
     const response = await axios.post(`${API_URL}/auth/login`, {
-      username: process.env.CRUD_TEST_SCRIPT_USERNAME || 'test@example.com',
-      password: process.env.CRUD_TEST_SCRIPT_PASSWORD || 'password123',
+      username: 'admin',
+      password: 'admin123',
     });
     authToken = response.data.access_token;
 

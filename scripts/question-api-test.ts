@@ -5,10 +5,8 @@ let authToken: string;
 
 async function login() {
   const response = await axios.post(`${API_URL}/auth/login`, {
-    // username: 'testuser',
-    // password: 'test123',
-    username: 'test@example.comx',
-    password: 'password123',
+    username: 'admin',
+    password: 'admin123',
   });
   authToken = response.data.access_token;
 }

@@ -79,6 +79,9 @@ export class FodderPoolsService {
   }
 
   async delete(id: string): Promise<void> {
+    // First delete all items in the pool
+    await this.fodderItemRepository.delete({ pool_id: id });
+    // Then delete the pool itself
     await this.fodderPoolRepository.delete(id);
   }
 }
