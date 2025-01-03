@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   Request,
+  Patch,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { QuestionsService } from './questions.service';
@@ -150,6 +151,59 @@ class GenerateActualDto {
   sectionPosition: number;
 }
 
+class UpdateTemplateDto {
+  @ApiProperty({
+    enum: ['text', 'multimedia'],
+    description: 'Type of user prompt',
+    required: false,
+  })
+  @IsEnum(['text', 'multimedia'])
+  @IsOptional()
+  userPromptType?: TUserPromptType;
+
+  @ApiProperty({
+    enum: ['free-text-255', 'multiple-choice-4', 'true-false'],
+    description: 'Type of user response',
+    required: false,
+  })
+  @IsEnum(['free-text-255', 'multiple-choice-4', 'true-false'])
+  @IsOptional()
+  userResponseType?: TUserResponseType;
+
+  @ApiProperty({
+    enum: ['exam-only', 'practice-only', 'exam-practice-both'],
+    description: 'Question exclusivity type',
+    required: false,
+  })
+  @IsEnum(['exam-only', 'practice-only', 'exam-practice-both'])
+  @IsOptional()
+  exclusivityType?: 'exam-only' | 'practice-only' | 'exam-practice-both';
+
+  @ApiProperty({ description: 'Text of the user prompt', required: false })
+  @IsString()
+  @IsOptional()
+  userPromptText?: string;
+
+  @ApiProperty({ description: 'Instruction text', required: false })
+  @IsString()
+  @IsOptional()
+  instructionText?: string;
+
+  @ApiProperty({ type: [MediaDto], required: false })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MediaDto)
+  @IsOptional()
+  media?: MediaDto[];
+
+  @ApiProperty({ type: [ValidAnswerDto], required: false })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ValidAnswerDto)
+  @IsOptional()
+  validAnswers?: ValidAnswerDto[];
+}
+
 @ApiTags('questions')
 @Controller('questions')
 @UseGuards(JwtAuthGuard)
@@ -230,5 +284,27 @@ export class QuestionsController {
   @ApiResponse({ status: 404, description: 'Question not found' })
   findActualById(@Param('id') id: string): Promise<QuestionActual> {
     return this.questionsService.findActualById(id);
+  }
+
+  @Patch('templates/:id')
+  @ApiOperation({ summary: 'Update a question template' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of the question template to update',
+  })
+  @ApiBody({ type: UpdateTemplateDto })
+  @ApiResponse({
+    status: 200,
+    description: 'The question template has been updated',
+    type: QuestionTemplate,
+  })
+  @ApiResponse({ status: 404, description: 'Template not found' })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  updateTemplate(
+    @Param('id') id: string,
+    @Body() data: UpdateTemplateDto,
+    @Request() req,
+  ): Promise<QuestionTemplate> {
+    return this.questionsService.updateTemplate(id, data, req.user.id);
   }
 }

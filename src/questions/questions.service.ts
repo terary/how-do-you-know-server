@@ -167,4 +167,79 @@ export class QuestionsService {
       relations: ['choices', 'validAnswers'],
     });
   }
+
+  async updateTemplate(
+    id: string,
+    data: {
+      userPromptType?: TUserPromptType;
+      userResponseType?: TUserResponseType;
+      exclusivityType?: 'exam-only' | 'practice-only' | 'exam-practice-both';
+      userPromptText?: string;
+      instructionText?: string;
+      media?: {
+        mediaContentType: 'audio/mpeg' | 'video/mp4';
+        height: number;
+        width: number;
+        url: string;
+        specialInstructionText?: string;
+        duration?: number;
+        fileSize?: number;
+        thumbnailUrl?: string;
+      }[];
+      validAnswers?: {
+        text?: string;
+        booleanValue?: boolean;
+        fodderPoolId?: string;
+      }[];
+    },
+    userId: string,
+  ): Promise<QuestionTemplate> {
+    const template = await this.findTemplateById(id);
+    if (!template) {
+      throw new Error('Template not found');
+    }
+
+    // Update basic fields
+    if (data.userPromptType) template.userPromptType = data.userPromptType;
+    if (data.userResponseType)
+      template.userResponseType = data.userResponseType;
+    if (data.exclusivityType) template.exclusivityType = data.exclusivityType;
+    if (data.userPromptText) template.userPromptText = data.userPromptText;
+    if (data.instructionText) template.instructionText = data.instructionText;
+
+    // Save the updated template
+    const savedTemplate = await this.templateRepository.save(template);
+
+    // Update media if provided
+    if (data.media) {
+      // Remove existing media
+      await this.templateMediaRepository.delete({ template_id: id });
+
+      // Add new media
+      const mediaEntities = data.media.map((m) =>
+        this.templateMediaRepository.create({
+          template_id: savedTemplate.id,
+          ...m,
+        }),
+      );
+      await this.templateMediaRepository.save(mediaEntities);
+    }
+
+    // Update valid answers if provided
+    if (data.validAnswers) {
+      // Remove existing answers
+      await this.templateAnswerRepository.delete({ template_id: id });
+
+      // Add new answers
+      const answerEntities = data.validAnswers.map((a) =>
+        this.templateAnswerRepository.create({
+          template_id: savedTemplate.id,
+          ...a,
+        }),
+      );
+      await this.templateAnswerRepository.save(answerEntities);
+    }
+
+    return this.findTemplateById(savedTemplate.id);
+  }
 }
