@@ -1,23 +1,41 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { TAuthenticatedUser } from './types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
+
+  async onModuleInit() {
+    // Create test user if it doesn't exist
+    const testUser = await this.findByUsername('test@example.com');
+    if (!testUser) {
+      const hashedPassword = await bcrypt.hash('password123', 10);
+      await this.create({
+        username: 'test@example.com',
+        password: hashedPassword,
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test@example.com',
+        roles: ['admin:exams', 'admin:users'],
+      });
+    }
+  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const user = this.usersRepository.create({
       ...createUserDto,
       roles: ['user', 'public'],
     });
+    console.log({ userSave: user });
     return this.usersRepository.save(user);
   }
 
@@ -66,5 +84,9 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
     await this.usersRepository.remove(user);
+  }
+
+  async findByUsername(username: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { username } });
   }
 }
