@@ -3,22 +3,11 @@ import axios from 'axios';
 const API_URL = 'http://localhost:3001';
 let authToken: string;
 
-`
-   Want to understand the newly creates scripts a little better.
-
-   Then do stuff with them.
-
-   Once they run without error, commit
-
-
-
-`;
-
 async function login() {
   const response = await axios.post(`${API_URL}/auth/login`, {
     // username: 'testuser',
     // password: 'test123',
-    username: 'test@example.com',
+    username: 'test@example.comx',
     password: 'password123',
   });
   authToken = response.data.access_token;
