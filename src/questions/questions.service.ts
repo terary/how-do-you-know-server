@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -9,7 +9,32 @@ import {
   QuestionActualChoice,
   QuestionActualValidAnswer,
 } from './entities';
-import { TUserPromptType, TUserResponseType } from './types';
+import { TUserPromptType, TUserResponseType, TMediaContentType } from './types';
+
+type CreateTemplateData = {
+  userPromptType: TUserPromptType;
+  userResponseType: TUserResponseType;
+  exclusivityType: 'exam-only' | 'practice-only' | 'exam-practice-both';
+  userPromptText?: string;
+  instructionText?: string;
+  media?: {
+    mediaContentType: TMediaContentType;
+    height: number;
+    width: number;
+    url: string;
+    specialInstructionText?: string;
+    duration?: number;
+    fileSize?: number;
+    thumbnailUrl?: string;
+  }[];
+  validAnswers: {
+    text?: string;
+    booleanValue?: boolean;
+    fodderPoolId?: string;
+  }[];
+};
+
+type UpdateTemplateData = Partial<CreateTemplateData>;
 
 @Injectable()
 export class QuestionsService {
@@ -42,28 +67,7 @@ export class QuestionsService {
   }
 
   async createTemplate(
-    data: {
-      userPromptType: TUserPromptType;
-      userResponseType: TUserResponseType;
-      exclusivityType: 'exam-only' | 'practice-only' | 'exam-practice-both';
-      userPromptText?: string;
-      instructionText?: string;
-      media?: {
-        mediaContentType: 'audio/mpeg' | 'video/mp4';
-        height: number;
-        width: number;
-        url: string;
-        specialInstructionText?: string;
-        duration?: number;
-        fileSize?: number;
-        thumbnailUrl?: string;
-      }[];
-      validAnswers: {
-        text?: string;
-        booleanValue?: boolean;
-        fodderPoolId?: string;
-      }[];
-    },
+    data: CreateTemplateData,
     userId: string,
   ): Promise<QuestionTemplate> {
     const template = this.templateRepository.create({
@@ -170,28 +174,7 @@ export class QuestionsService {
 
   async updateTemplate(
     id: string,
-    data: {
-      userPromptType?: TUserPromptType;
-      userResponseType?: TUserResponseType;
-      exclusivityType?: 'exam-only' | 'practice-only' | 'exam-practice-both';
-      userPromptText?: string;
-      instructionText?: string;
-      media?: {
-        mediaContentType: 'audio/mpeg' | 'video/mp4';
-        height: number;
-        width: number;
-        url: string;
-        specialInstructionText?: string;
-        duration?: number;
-        fileSize?: number;
-        thumbnailUrl?: string;
-      }[];
-      validAnswers?: {
-        text?: string;
-        booleanValue?: boolean;
-        fodderPoolId?: string;
-      }[];
-    },
+    data: UpdateTemplateData,
     userId: string,
   ): Promise<QuestionTemplate> {
     const template = await this.findTemplateById(id);

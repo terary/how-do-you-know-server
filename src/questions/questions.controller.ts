@@ -34,11 +34,72 @@ import { Type } from 'class-transformer';
 
 class MediaDto {
   @ApiProperty({
-    enum: ['audio/mpeg', 'video/mp4'],
-    description: 'Content type of the media',
+    enum: [
+      'application/octet-stream',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml',
+      'image/*',
+      'audio/mpeg',
+      'audio/wav',
+      'audio/ogg',
+      'audio/aac',
+      'audio/webm',
+      'audio/*',
+      'video/mp4',
+      'video/webm',
+      'video/ogg',
+      'video/avi',
+      'video/quicktime',
+      'video/*',
+    ],
+    description:
+      'Content type of the media. Use */* types for iframe/embedded content.',
+    example: 'video/mp4',
   })
-  @IsEnum(['audio/mpeg', 'video/mp4'])
-  mediaContentType: 'audio/mpeg' | 'video/mp4';
+  @IsEnum([
+    'application/octet-stream',
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/svg+xml',
+    'image/*',
+    'audio/mpeg',
+    'audio/wav',
+    'audio/ogg',
+    'audio/aac',
+    'audio/webm',
+    'audio/*',
+    'video/mp4',
+    'video/webm',
+    'video/ogg',
+    'video/avi',
+    'video/quicktime',
+    'video/*',
+  ])
+  mediaContentType:
+    | 'application/octet-stream'
+    | 'image/jpeg'
+    | 'image/png'
+    | 'image/gif'
+    | 'image/webp'
+    | 'image/svg+xml'
+    | 'image/*'
+    | 'audio/mpeg'
+    | 'audio/wav'
+    | 'audio/ogg'
+    | 'audio/aac'
+    | 'audio/webm'
+    | 'audio/*'
+    | 'video/mp4'
+    | 'video/webm'
+    | 'video/ogg'
+    | 'video/avi'
+    | 'video/quicktime'
+    | 'video/*';
 
   @ApiProperty({ description: 'Height of the media in pixels' })
   @IsNumber()

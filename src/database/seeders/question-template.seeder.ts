@@ -26,7 +26,7 @@ export class QuestionTemplateSeeder {
   async seed() {
     // Find admin user using raw query since roles is stored as comma-separated string
     const adminUsers = await this.userRepository.query(
-      `SELECT * FROM "user" WHERE roles LIKE '%admin:exams%' LIMIT 1`,
+      `SELECT * FROM "users" WHERE roles LIKE '%admin:exams%' LIMIT 1`,
     );
     const adminUser = adminUsers[0];
 

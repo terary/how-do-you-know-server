@@ -8,6 +8,27 @@ import {
 } from 'typeorm';
 import { QuestionTemplate } from './question-template.entity';
 
+type MediaContentType =
+  | 'application/octet-stream'
+  | 'image/jpeg'
+  | 'image/png'
+  | 'image/gif'
+  | 'image/webp'
+  | 'image/svg+xml'
+  | 'image/*'
+  | 'audio/mpeg'
+  | 'audio/wav'
+  | 'audio/ogg'
+  | 'audio/aac'
+  | 'audio/webm'
+  | 'audio/*'
+  | 'video/mp4'
+  | 'video/webm'
+  | 'video/ogg'
+  | 'video/avi'
+  | 'video/quicktime'
+  | 'video/*';
+
 @Entity('question_template_media')
 export class QuestionTemplateMedia {
   @PrimaryGeneratedColumn('uuid')
@@ -20,7 +41,7 @@ export class QuestionTemplateMedia {
     type: 'text',
     name: 'media_content_type',
   })
-  mediaContentType: 'audio/mpeg' | 'video/mp4';
+  mediaContentType: MediaContentType;
 
   @Column()
   height: number;

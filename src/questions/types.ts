@@ -45,9 +45,31 @@ type TMultipleChoiceOptions = readonly [
   { text: string },
 ];
 
+/** Media content type */
+type TMediaContentType =
+  | 'application/octet-stream'
+  | 'image/jpeg'
+  | 'image/png'
+  | 'image/gif'
+  | 'image/webp'
+  | 'image/svg+xml'
+  | 'image/*'
+  | 'audio/mpeg'
+  | 'audio/wav'
+  | 'audio/ogg'
+  | 'audio/aac'
+  | 'audio/webm'
+  | 'audio/*'
+  | 'video/mp4'
+  | 'video/webm'
+  | 'video/ogg'
+  | 'video/avi'
+  | 'video/quicktime'
+  | 'video/*';
+
 /** Properties for multimedia content with enhanced validation */
 type TMultipleMediaProperties = {
-  readonly mediaContentType: 'audio/mpeg' | 'video/mp4';
+  readonly mediaContentType: TMediaContentType;
   readonly height: number & { readonly _brand: 'PositiveNumber' };
   readonly width: number & { readonly _brand: 'PositiveNumber' };
   readonly url: string;
@@ -305,4 +327,5 @@ export type {
   TQuestionActualTextMultipleChoice4,
   TUserPromptType,
   TUserResponseType,
+  TMediaContentType,
 };
