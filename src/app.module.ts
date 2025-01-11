@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { DevDebugModule } from './dev-debug/dev-debug.module';
 import { QuestionsModule } from './questions/questions.module';
 import { FodderPoolsModule } from './questions/fodder-pools.module';
+import { LearningModule } from './learning/learning.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { FodderPoolsModule } from './questions/fodder-pools.module';
     DevDebugModule,
     QuestionsModule,
     FodderPoolsModule,
+    LearningModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -38,5 +38,20 @@
             "internalConsoleOptions": "neverOpen",
             "port": 9229
         },
+        {
+            "name": "Debug E2E Tests",
+            "type": "node",
+            "request": "launch",
+            "runtimeArgs": [
+                "--inspect-brk",
+                "${workspaceRoot}/node_modules/.bin/jest",
+                "--runInBand",
+                "--config",
+                "./test/jest-e2e.json"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229
+        }
     ]
 }
