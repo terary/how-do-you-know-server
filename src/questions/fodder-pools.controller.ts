@@ -45,7 +45,7 @@ export class FodderPoolsController {
     type: [FodderPool],
   })
   findAll(): Promise<FodderPool[]> {
-    return this.fodderPoolsService.findAll();
+    return this.fodderPoolsService.getAll();
   }
 
   @Get(':id')
@@ -57,7 +57,7 @@ export class FodderPoolsController {
     type: FodderPool,
   })
   findOne(@Param('id') id: string): Promise<FodderPool> {
-    return this.fodderPoolsService.findOne(id);
+    return this.fodderPoolsService.getById(id);
   }
 
   @Post()

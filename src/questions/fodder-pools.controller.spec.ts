@@ -11,8 +11,9 @@ describe('FodderPoolsController', () => {
 
   // Mock service
   const mockFodderPoolsService = {
-    createPool: jest.fn(),
-    findPoolById: jest.fn(),
+    create: jest.fn(),
+    getById: jest.fn(),
+    getAll: jest.fn(),
     addItems: jest.fn(),
     removeItems: jest.fn(),
     delete: jest.fn(),
@@ -54,13 +55,13 @@ describe('FodderPoolsController', () => {
         created_at: new Date(),
       };
 
-      mockFodderPoolsService.createPool.mockResolvedValue(expectedPool);
+      mockFodderPoolsService.create.mockResolvedValue(expectedPool);
 
       const request = { user: { id: testUserId } };
       const result = await controller.create(createDto, request);
 
       expect(result).toEqual(expectedPool);
-      expect(service.createPool).toHaveBeenCalledWith(createDto, testUserId);
+      expect(service.create).toHaveBeenCalledWith(createDto, testUserId);
     });
   });
 
@@ -75,12 +76,40 @@ describe('FodderPoolsController', () => {
         created_at: new Date(),
       };
 
-      mockFodderPoolsService.findPoolById.mockResolvedValue(expectedPool);
+      mockFodderPoolsService.getById.mockResolvedValue(expectedPool);
 
       const result = await controller.findOne(poolId);
 
       expect(result).toEqual(expectedPool);
-      expect(service.findPoolById).toHaveBeenCalledWith(poolId);
+      expect(service.getById).toHaveBeenCalledWith(poolId);
+    });
+  });
+
+  describe('findAll', () => {
+    it('should return all pools', async () => {
+      const expectedPools = [
+        {
+          id: 'test-uuid-1',
+          name: 'Test Pool 1',
+          description: 'Test Description 1',
+          created_by: testUserId,
+          created_at: new Date(),
+        },
+        {
+          id: 'test-uuid-2',
+          name: 'Test Pool 2',
+          description: 'Test Description 2',
+          created_by: testUserId,
+          created_at: new Date(),
+        },
+      ];
+
+      mockFodderPoolsService.getAll.mockResolvedValue(expectedPools);
+
+      const result = await controller.findAll();
+
+      expect(result).toEqual(expectedPools);
+      expect(service.getAll).toHaveBeenCalled();
     });
   });
 
@@ -107,5 +136,24 @@ describe('FodderPoolsController', () => {
     });
   });
 
-  // Add more test cases as needed...
+  describe('removeItems', () => {
+    it('should remove items from a pool', async () => {
+      const poolId = 'test-pool-uuid';
+      const itemIds = ['item-1', 'item-2'];
+
+      await controller.removeItems(poolId, { itemIds });
+
+      expect(service.removeItems).toHaveBeenCalledWith(poolId, itemIds);
+    });
+  });
+
+  describe('remove', () => {
+    it('should delete a pool', async () => {
+      const poolId = 'test-pool-uuid';
+
+      await controller.remove(poolId);
+
+      expect(service.delete).toHaveBeenCalledWith(poolId);
+    });
+  });
 });
