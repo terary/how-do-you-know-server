@@ -12,13 +12,13 @@ export class FodderPoolsService {
     private readonly fodderItemRepository: Repository<FodderItem>,
   ) {}
 
-  async findAll(): Promise<FodderPool[]> {
+  async getAll(): Promise<FodderPool[]> {
     return this.fodderPoolRepository.find({
       relations: ['items'],
     });
   }
 
-  async findOne(id: string): Promise<FodderPool> {
+  async getById(id: string): Promise<FodderPool> {
     return this.fodderPoolRepository.findOne({
       where: { id },
       relations: ['items'],
@@ -52,7 +52,7 @@ export class FodderPoolsService {
       await this.fodderItemRepository.save(items);
     }
 
-    return this.findOne(savedPool.id);
+    return this.getById(savedPool.id);
   }
 
   async addItems(
@@ -83,5 +83,37 @@ export class FodderPoolsService {
     await this.fodderItemRepository.delete({ pool_id: id });
     // Then delete the pool itself
     await this.fodderPoolRepository.delete(id);
+  }
+
+  async update(
+    id: string,
+    data: {
+      name?: string;
+      description?: string;
+      itemsToAdd?: { text: string }[];
+      itemIdsToRemove?: string[];
+    },
+    userId: string,
+  ): Promise<FodderPool> {
+    // Update pool properties
+    const result = await this.fodderPoolRepository.update(id, {
+      name: data.name,
+      description: data.description,
+    });
+
+    if (result.affected === 0) {
+      return null;
+    }
+
+    // Handle items in same transaction if needed
+    if (data.itemsToAdd?.length) {
+      await this.addItems(id, data.itemsToAdd, userId);
+    }
+
+    if (data.itemIdsToRemove?.length) {
+      await this.removeItems(id, data.itemIdsToRemove);
+    }
+
+    return this.getById(id);
   }
 }
