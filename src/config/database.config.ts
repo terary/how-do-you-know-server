@@ -12,6 +12,8 @@ import { QuestionActualValidAnswer } from '../questions/entities/question-actual
 import { ExamTemplate } from '../learning/entities/exam-template.entity';
 import { ExamTemplateSection } from '../learning/entities/exam-template-section.entity';
 import { ExamTemplateSectionQuestion } from '../learning/entities/exam-template-section-question.entity';
+import { InstructionalCourse } from '../learning/entities/instructional-course.entity';
+import { LearningInstitution } from '../learning/entities/learning-institution.entity';
 
 export const getDatabaseConfig = (
   configService: ConfigService,
@@ -35,6 +37,8 @@ export const getDatabaseConfig = (
     ExamTemplate,
     ExamTemplateSection,
     ExamTemplateSectionQuestion,
+    InstructionalCourse,
+    LearningInstitution,
   ],
   synchronize: configService.get('NODE_ENV') === 'development',
   logging: configService.get('NODE_ENV') === 'development',

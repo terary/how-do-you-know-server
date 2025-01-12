@@ -1,3 +1,17 @@
+`
+    Need to working out seeder for new entities.
+
+    Then need to work out seeder for testing?
+
+    probably each test should insert each entity it requires
+    then remove them when it no longer needs them.
+
+    any/all get should avoid record count
+    post/put/patch endpoints should return a record id
+    to verify the operation completed successfully (maybe not delete)
+
+`;
+
 import { Client } from 'pg';
 
 async function testConnection() {
