@@ -17,11 +17,7 @@ import {
 } from '../src/learning/entities/instructional-course.entity';
 import { LearningInstitution } from '../src/learning/entities/learning-institution.entity';
 import { User } from '../src/users/entities/user.entity';
-import {
-  createTestingModule,
-  getTestUser,
-  cleanupTestData,
-} from './test-helper';
+import { createTestingModule } from './test-helper';
 
 describe('InstructionalCoursesController (e2e)', () => {
   let app: INestApplication;
@@ -47,6 +43,15 @@ describe('InstructionalCoursesController (e2e)', () => {
     userRepository = moduleFixture.get<Repository<User>>(
       getRepositoryToken(User),
     );
+
+    // Clean up any existing test data from this suite
+    await courseRepository.delete({});
+    await institutionRepository.delete({
+      name: 'Test Institution - Instructional Courses',
+    });
+    await userRepository.delete({
+      username: 'test-instructional-courses@test.com',
+    });
 
     // Create our own test user with a unique identifier for this test suite
     const testUsername = 'test-instructional-courses@test.com';
@@ -92,15 +97,34 @@ describe('InstructionalCoursesController (e2e)', () => {
 
   beforeEach(async () => {
     // Clean up only course data before each test
-    await courseRepository.delete({});
+    await courseRepository.delete({
+      institution: { id: savedInstitution.id },
+    });
   });
 
   afterAll(async () => {
-    // Clean up ALL test data we created
-    await courseRepository.delete({});
-    await institutionRepository.delete({ id: savedInstitution.id });
-    await userRepository.delete({ id: testUser.id });
-    await app.close();
+    try {
+      // Clean up ALL test data we created, in correct order
+      if (courseRepository && savedInstitution) {
+        await courseRepository.delete({
+          institution: { id: savedInstitution.id },
+        });
+      }
+      if (institutionRepository && savedInstitution) {
+        await institutionRepository.delete({
+          id: savedInstitution.id,
+        });
+      }
+      if (userRepository) {
+        await userRepository.delete({
+          username: 'test-instructional-courses@test.com',
+        });
+      }
+    } finally {
+      if (app) {
+        await app.close();
+      }
+    }
   });
 
   describe('POST /instructional-courses', () => {
@@ -108,7 +132,7 @@ describe('InstructionalCoursesController (e2e)', () => {
       const createDto = {
         name: 'Test Course',
         description: 'A test course for e2e testing',
-        institution_id: savedInstitution.id,
+        institution: savedInstitution,
         start_date: new Date('2024-01-01'),
         finish_date: new Date('2024-12-31'),
         start_time_utc: '14:00',
@@ -127,7 +151,7 @@ describe('InstructionalCoursesController (e2e)', () => {
           expect(res.body).toHaveProperty('id');
           expect(res.body.name).toBe(createDto.name);
           expect(res.body.description).toBe(createDto.description);
-          expect(res.body.institution_id).toBe(createDto.institution_id);
+          expect(res.body.institution_id).toBe(savedInstitution.id);
           expect(new Date(res.body.start_date)).toEqual(createDto.start_date);
           expect(new Date(res.body.finish_date)).toEqual(createDto.finish_date);
           expect(res.body.created_by).toBe(testUser.id);

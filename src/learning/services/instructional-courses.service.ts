@@ -5,18 +5,48 @@ import { InstructionalCourse } from '../entities/instructional-course.entity';
 import { CreateInstructionalCourseDto } from '../dto/create-instructional-course.dto';
 import { UpdateInstructionalCourseDto } from '../dto/update-instructional-course.dto';
 import { InstructionalCourseDto } from '../dto/instructional-course.dto';
+import { LearningInstitution } from '../entities/learning-institution.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Injectable()
 export class InstructionalCoursesService {
   constructor(
     @InjectRepository(InstructionalCourse)
     private readonly courseRepository: Repository<InstructionalCourse>,
+    @InjectRepository(LearningInstitution)
+    private readonly institutionRepository: Repository<LearningInstitution>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(
     data: CreateInstructionalCourseDto & { created_by: string },
   ): Promise<InstructionalCourseDto> {
-    const course = this.courseRepository.create(data);
+    // Find the institution
+    const institution = await this.institutionRepository.findOne({
+      where: { id: data.institution_id },
+    });
+    if (!institution) {
+      throw new NotFoundException(
+        `Institution with ID "${data.institution_id}" not found`,
+      );
+    }
+
+    // Find the instructor
+    const instructor = await this.userRepository.findOne({
+      where: { id: data.instructor_id },
+    });
+    if (!instructor) {
+      throw new NotFoundException(
+        `Instructor with ID "${data.instructor_id}" not found`,
+      );
+    }
+
+    const course = this.courseRepository.create({
+      ...data,
+      institution,
+      instructor,
+    });
     const saved = await this.courseRepository.save(course);
     return this.toDto(saved);
   }

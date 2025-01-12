@@ -25,11 +25,11 @@ describe('AppController (e2e)', () => {
   let validAnswerRepo: Repository<QuestionTemplateValidAnswer>;
 
   const testUser = {
-    username: 'test@example.com',
+    username: 'test-app-e2e@test.com',
     password: 'password123',
     firstName: 'Test',
-    lastName: 'User',
-    email: 'test@example.com',
+    lastName: 'App E2E',
+    email: 'test-app-e2e@test.com',
     roles: ['admin:exams', 'admin:users', 'user', 'public'] as TUserRole[],
   };
 
@@ -52,46 +52,64 @@ describe('AppController (e2e)', () => {
   };
 
   beforeAll(async () => {
-    moduleFixture = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    try {
+      moduleFixture = await Test.createTestingModule({
+        imports: [AppModule],
+      }).compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
+      app = moduleFixture.createNestApplication();
+      await app.init();
 
-    // Get repositories
-    fodderPoolRepo = moduleFixture.get<Repository<FodderPool>>(
-      getRepositoryToken(FodderPool),
-    );
-    fodderItemRepo = moduleFixture.get<Repository<FodderItem>>(
-      getRepositoryToken(FodderItem),
-    );
-    userRepo = moduleFixture.get<Repository<User>>(getRepositoryToken(User));
-    validAnswerRepo = moduleFixture.get<
-      Repository<QuestionTemplateValidAnswer>
-    >(getRepositoryToken(QuestionTemplateValidAnswer));
+      if (!app || !app.getHttpServer()) {
+        throw new Error('Failed to initialize app');
+      }
 
-    // Clean up any existing test data
-    await cleanupTestData();
+      // Get repositories
+      fodderPoolRepo = moduleFixture.get<Repository<FodderPool>>(
+        getRepositoryToken(FodderPool),
+      );
+      fodderItemRepo = moduleFixture.get<Repository<FodderItem>>(
+        getRepositoryToken(FodderItem),
+      );
+      userRepo = moduleFixture.get<Repository<User>>(getRepositoryToken(User));
+      validAnswerRepo = moduleFixture.get<
+        Repository<QuestionTemplateValidAnswer>
+      >(getRepositoryToken(QuestionTemplateValidAnswer));
 
-    // Create test user
-    const hashedPassword = await bcrypt.hash(testUser.password, 10);
-    const user = userRepo.create({
-      ...testUser,
-      password: hashedPassword,
-    });
-    await userRepo.save(user);
+      // Clean up any existing test data
+      await cleanupTestData();
+
+      // Create test user
+      const hashedPassword = await bcrypt.hash(testUser.password, 10);
+      const user = userRepo.create({
+        ...testUser,
+        password: hashedPassword,
+      });
+      await userRepo.save(user);
+    } catch (error) {
+      console.error('Error in beforeAll:', error);
+      throw error;
+    }
   });
 
   afterAll(async () => {
-    // Clean up the database
-    await cleanupTestData();
+    try {
+      // Clean up the database
+      await cleanupTestData();
 
-    // Close the application
-    await app.close();
+      // Close the application if it exists
+      if (app) {
+        await app.close();
+      }
 
-    // Close the module
-    await moduleFixture.close();
+      // Close the module if it exists
+      if (moduleFixture) {
+        await moduleFixture.close();
+      }
+    } catch (error) {
+      console.error('Error in afterAll:', error);
+      throw error;
+    }
   });
 
   describe('Auth', () => {

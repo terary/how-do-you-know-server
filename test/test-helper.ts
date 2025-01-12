@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { ConfigModule } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
 import { User } from '../src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -16,7 +15,6 @@ import { LearningInstitution } from '../src/learning/entities/learning-instituti
 let testDataSource: DataSource;
 let testModule: TestingModule;
 let testApp: INestApplication;
-let testUser: User;
 
 export const setupTestDatabase = async () => {
   if (!testDataSource || !testDataSource.isInitialized) {
@@ -58,61 +56,45 @@ export const createTestingModule = async () => {
   testApp = testModule.createNestApplication();
   await testApp.init();
 
-  // Create test user if it doesn't exist
-  const userRepository = testModule.get<Repository<User>>(
-    getRepositoryToken(User),
-  );
-  testUser = await userRepository.findOne({
-    where: { username: 'test@example.com' },
-  });
-
-  if (!testUser) {
-    const hashedPassword = await bcrypt.hash('password123', 10);
-    testUser = await userRepository.save({
-      username: 'test@example.com',
-      password: hashedPassword,
-      firstName: 'Test',
-      lastName: 'User',
-      email: 'test@example.com',
-      roles: ['admin:exams', 'admin:users', 'user', 'public'],
-    });
-  }
-
   return { app: testApp, module: testModule };
 };
-
-export const getTestUser = () => testUser;
 
 export const getTestApp = () => testApp;
 
 export const getTestModule = () => testModule;
 
 export const cleanupTestData = async () => {
-  // Get all repositories
-  const examTemplateSectionQuestionRepository = testModule.get<
-    Repository<ExamTemplateSectionQuestion>
-  >(getRepositoryToken(ExamTemplateSectionQuestion));
-  const examTemplateSectionRepository = testModule.get<
-    Repository<ExamTemplateSection>
-  >(getRepositoryToken(ExamTemplateSection));
-  const examTemplateRepository = testModule.get<Repository<ExamTemplate>>(
-    getRepositoryToken(ExamTemplate),
-  );
-  const instructionalCourseRepository = testModule.get<
-    Repository<InstructionalCourse>
-  >(getRepositoryToken(InstructionalCourse));
-  const learningInstitutionRepository = testModule.get<
-    Repository<LearningInstitution>
-  >(getRepositoryToken(LearningInstitution));
-  const userRepository = testModule.get<Repository<User>>(
-    getRepositoryToken(User),
-  );
+  if (!testModule) return;
 
-  // Delete in reverse order of dependencies
-  await examTemplateSectionQuestionRepository.delete({});
-  await examTemplateSectionRepository.delete({});
-  await examTemplateRepository.delete({});
-  await instructionalCourseRepository.delete({});
-  await learningInstitutionRepository.delete({});
-  await userRepository.delete({});
+  try {
+    // Get all repositories
+    const examTemplateSectionQuestionRepository = testModule.get<
+      Repository<ExamTemplateSectionQuestion>
+    >(getRepositoryToken(ExamTemplateSectionQuestion));
+    const examTemplateSectionRepository = testModule.get<
+      Repository<ExamTemplateSection>
+    >(getRepositoryToken(ExamTemplateSection));
+    const examTemplateRepository = testModule.get<Repository<ExamTemplate>>(
+      getRepositoryToken(ExamTemplate),
+    );
+    const instructionalCourseRepository = testModule.get<
+      Repository<InstructionalCourse>
+    >(getRepositoryToken(InstructionalCourse));
+    const learningInstitutionRepository = testModule.get<
+      Repository<LearningInstitution>
+    >(getRepositoryToken(LearningInstitution));
+    const userRepository = testModule.get<Repository<User>>(
+      getRepositoryToken(User),
+    );
+
+    // Delete in reverse order of dependencies
+    await examTemplateSectionQuestionRepository.delete({});
+    await examTemplateSectionRepository.delete({});
+    await examTemplateRepository.delete({});
+    await instructionalCourseRepository.delete({});
+    await learningInstitutionRepository.delete({});
+    await userRepository.delete({});
+  } catch (error) {
+    console.error('Error cleaning up test data:', error);
+  }
 };

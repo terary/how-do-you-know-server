@@ -14,11 +14,7 @@ import { Repository } from 'typeorm';
 import { User } from '../src/users/entities/user.entity';
 import { TUserRole } from '../src/users/types';
 import { LearningInstitution } from '../src/learning/entities/learning-institution.entity';
-import {
-  createTestingModule,
-  cleanupTestDatabase,
-  cleanupTestData,
-} from './test-helper';
+import { createTestingModule } from './test-helper';
 
 describe('LearningInstitutionsController (e2e)', () => {
   let app: INestApplication;
@@ -46,12 +42,18 @@ describe('LearningInstitutionsController (e2e)', () => {
       getRepositoryToken(LearningInstitution),
     );
 
+    // Clean up any existing test data from this suite
+    await institutionRepository.delete({});
+    await userRepository.delete({
+      username: 'test-learning-institutions@test.com',
+    });
+
     // Create test user
     const testUser = userRepository.create({
-      username: 'test.admin',
+      username: 'test-learning-institutions@test.com',
       firstName: 'Test',
-      lastName: 'Admin',
-      email: 'test.admin@test.edu',
+      lastName: 'Learning Institutions',
+      email: 'test-learning-institutions@test.com',
       password: await bcrypt.hash('password123', 10),
       roles: ['admin:exams'] as TUserRole[],
     });
@@ -62,22 +64,32 @@ describe('LearningInstitutionsController (e2e)', () => {
     const loginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
-        username: 'test.admin',
+        username: 'test-learning-institutions@test.com',
         password: 'password123',
       });
     authToken = loginResponse.body.access_token;
   });
 
   beforeEach(async () => {
-    // Clean up test-specific data
-    await cleanupTestData();
+    // Clean up only institution data before each test
+    await institutionRepository.delete({});
   });
 
   afterAll(async () => {
     try {
-      await app.close();
+      // Clean up ALL test data we created
+      if (institutionRepository) {
+        await institutionRepository.delete({});
+      }
+      if (userRepository) {
+        await userRepository.delete({
+          username: 'test-learning-institutions@test.com',
+        });
+      }
     } finally {
-      await cleanupTestDatabase();
+      if (app) {
+        await app.close();
+      }
     }
   });
 

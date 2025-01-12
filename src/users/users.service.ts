@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -19,9 +20,15 @@ export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private configService: ConfigService,
   ) {}
 
   async onModuleInit() {
+    // Skip default user creation in test environment
+    if (this.configService.get('NODE_ENV') === 'test') {
+      return;
+    }
+
     // Create test user if it doesn't exist
     const testUser = await this.findByUsername('test@example.com');
     if (!testUser) {
