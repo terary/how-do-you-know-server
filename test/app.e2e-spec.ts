@@ -1,3 +1,9 @@
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load test environment variables
+config({ path: resolve(__dirname, '../.env.test') });
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
@@ -27,6 +33,24 @@ describe('AppController (e2e)', () => {
     roles: ['admin:exams', 'admin:users', 'user', 'public'] as TUserRole[],
   };
 
+  const cleanupTestData = async () => {
+    try {
+      // Delete in correct order to avoid foreign key constraints
+      await validAnswerRepo?.query(
+        'DELETE FROM question_template_valid_answers',
+      );
+      await fodderPoolRepo?.query('DELETE FROM fodder_items');
+      await fodderPoolRepo?.query('DELETE FROM fodder_pools');
+      await userRepo?.query('DELETE FROM exam_template_section_questions');
+      await userRepo?.query('DELETE FROM exam_template_sections');
+      await userRepo?.query('DELETE FROM exam_templates');
+      await userRepo?.query('DELETE FROM instructional_courses');
+      await userRepo?.query('DELETE FROM users');
+    } catch (error) {
+      console.error('Error during cleanup:', error);
+    }
+  };
+
   beforeAll(async () => {
     moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
@@ -48,10 +72,7 @@ describe('AppController (e2e)', () => {
     >(getRepositoryToken(QuestionTemplateValidAnswer));
 
     // Clean up any existing test data
-    await fodderItemRepo.delete({});
-    await validAnswerRepo.delete({});
-    await fodderPoolRepo.delete({});
-    await userRepo.delete({ username: testUser.username });
+    await cleanupTestData();
 
     // Create test user
     const hashedPassword = await bcrypt.hash(testUser.password, 10);
@@ -63,11 +84,8 @@ describe('AppController (e2e)', () => {
   });
 
   afterAll(async () => {
-    // Clean up the database in correct order
-    await fodderItemRepo.delete({});
-    await validAnswerRepo.delete({});
-    await fodderPoolRepo.delete({});
-    await userRepo.delete({ username: testUser.username });
+    // Clean up the database
+    await cleanupTestData();
 
     // Close the application
     await app.close();

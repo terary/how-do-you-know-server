@@ -5,12 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
-  ManyToMany,
-  JoinTable,
 } from 'typeorm';
 import { InstructionalCourse } from './instructional-course.entity';
-import { QuestionTemplate } from '../../questions/entities/question-template.entity';
+import { ExamTemplateSection } from './exam-template-section.entity';
 
 export type ExamExclusivityType =
   | 'exam-only'
@@ -47,19 +46,8 @@ export class ExamTemplate {
   @Column('uuid')
   course_id: string;
 
-  @ManyToMany(() => QuestionTemplate)
-  @JoinTable({
-    name: 'exam_template_questions',
-    joinColumn: {
-      name: 'exam_template_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'question_template_id',
-      referencedColumnName: 'id',
-    },
-  })
-  questions: QuestionTemplate[];
+  @OneToMany(() => ExamTemplateSection, (section) => section.examTemplate)
+  sections: ExamTemplateSection[];
 
   @Column('uuid')
   created_by: string;

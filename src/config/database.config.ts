@@ -9,6 +9,9 @@ import { FodderItem } from '../questions/entities/fodder-item.entity';
 import { QuestionActual } from '../questions/entities/question-actual.entity';
 import { QuestionActualChoice } from '../questions/entities/question-actual-choice.entity';
 import { QuestionActualValidAnswer } from '../questions/entities/question-actual-valid-answer.entity';
+import { ExamTemplate } from '../learning/entities/exam-template.entity';
+import { ExamTemplateSection } from '../learning/entities/exam-template-section.entity';
+import { ExamTemplateSectionQuestion } from '../learning/entities/exam-template-section-question.entity';
 
 export const getDatabaseConfig = (
   configService: ConfigService,
@@ -29,6 +32,9 @@ export const getDatabaseConfig = (
     QuestionActual,
     QuestionActualChoice,
     QuestionActualValidAnswer,
+    ExamTemplate,
+    ExamTemplateSection,
+    ExamTemplateSectionQuestion,
   ],
   synchronize: configService.get('NODE_ENV') === 'development',
   logging: configService.get('NODE_ENV') === 'development',
