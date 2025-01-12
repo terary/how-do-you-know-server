@@ -101,16 +101,18 @@ describe('LearningInstitutionsService', () => {
       expect(result).toEqual(mockInstitution);
     });
 
-    it('should return null if institution is not found', async () => {
+    it('should throw NotFoundException if institution is not found', async () => {
       jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null);
       const id = 'non-existent-id';
-      const result = await service.findOne(id);
+
+      await expect(service.findOne(id)).rejects.toThrow(
+        'Learning institution with ID "non-existent-id" not found',
+      );
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { id },
         relations: ['courses'],
       });
-      expect(result).toBeNull();
     });
   });
 

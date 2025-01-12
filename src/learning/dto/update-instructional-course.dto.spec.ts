@@ -1,4 +1,5 @@
 import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 import { UpdateInstructionalCourseDto } from './update-instructional-course.dto';
 import { DayOfWeek } from '../entities/instructional-course.entity';
 
@@ -10,33 +11,38 @@ describe('UpdateInstructionalCourseDto', () => {
   });
 
   it('should validate an empty DTO', async () => {
-    const errors = await validate(dto);
+    const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+    const errors = await validate(instance);
     expect(errors.length).toBe(0);
   });
 
   describe('name validation', () => {
     it('should be optional', async () => {
       dto.name = undefined;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
     it('should validate when provided', async () => {
       dto.name = 'Test Course';
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
     it('should enforce minimum length when provided', async () => {
       dto.name = 'AB';
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const nameErrors = errors.filter((e) => e.property === 'name');
       expect(nameErrors.length).toBeGreaterThan(0);
     });
 
     it('should enforce maximum length when provided', async () => {
       dto.name = 'A'.repeat(101);
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const nameErrors = errors.filter((e) => e.property === 'name');
       expect(nameErrors.length).toBeGreaterThan(0);
     });
@@ -45,19 +51,22 @@ describe('UpdateInstructionalCourseDto', () => {
   describe('description validation', () => {
     it('should be optional', async () => {
       dto.description = undefined;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
     it('should validate when provided', async () => {
       dto.description = 'A comprehensive test course description';
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
     it('should enforce minimum length when provided', async () => {
       dto.description = 'Short';
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const descErrors = errors.filter((e) => e.property === 'description');
       expect(descErrors.length).toBeGreaterThan(0);
     });
@@ -67,13 +76,15 @@ describe('UpdateInstructionalCourseDto', () => {
     it('should be optional', async () => {
       dto.start_date = undefined;
       dto.finish_date = undefined;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
     it('should validate date format when provided', async () => {
       dto.start_date = 'not-a-date' as any;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const dateErrors = errors.filter((e) => e.property === 'start_date');
       expect(dateErrors.length).toBeGreaterThan(0);
     });
@@ -81,7 +92,8 @@ describe('UpdateInstructionalCourseDto', () => {
     it('should accept valid dates', async () => {
       dto.start_date = '2024-02-01T00:00:00Z' as any;
       dto.finish_date = '2024-05-31T00:00:00Z' as any;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
   });
@@ -89,7 +101,8 @@ describe('UpdateInstructionalCourseDto', () => {
   describe('start_time_utc validation', () => {
     it('should be optional', async () => {
       dto.start_time_utc = undefined;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
@@ -97,7 +110,8 @@ describe('UpdateInstructionalCourseDto', () => {
       const invalidTimes = ['25:00', '14:60', 'not-a-time', '1:00'];
       for (const time of invalidTimes) {
         dto.start_time_utc = time;
-        const errors = await validate(dto);
+        const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+        const errors = await validate(instance);
         const timeErrors = errors.filter(
           (e) => e.property === 'start_time_utc',
         );
@@ -109,7 +123,8 @@ describe('UpdateInstructionalCourseDto', () => {
       const validTimes = ['00:00', '14:00', '23:59'];
       for (const time of validTimes) {
         dto.start_time_utc = time;
-        const errors = await validate(dto);
+        const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+        const errors = await validate(instance);
         expect(errors.length).toBe(0);
       }
     });
@@ -118,13 +133,15 @@ describe('UpdateInstructionalCourseDto', () => {
   describe('duration_minutes validation', () => {
     it('should be optional', async () => {
       dto.duration_minutes = undefined;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
     it('should enforce minimum duration when provided', async () => {
       dto.duration_minutes = 14;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const durationErrors = errors.filter(
         (e) => e.property === 'duration_minutes',
       );
@@ -133,7 +150,8 @@ describe('UpdateInstructionalCourseDto', () => {
 
     it('should enforce maximum duration when provided', async () => {
       dto.duration_minutes = 481;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const durationErrors = errors.filter(
         (e) => e.property === 'duration_minutes',
       );
@@ -142,7 +160,8 @@ describe('UpdateInstructionalCourseDto', () => {
 
     it('should accept valid duration', async () => {
       dto.duration_minutes = 90;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
   });
@@ -150,27 +169,31 @@ describe('UpdateInstructionalCourseDto', () => {
   describe('days_of_week validation', () => {
     it('should be optional', async () => {
       dto.days_of_week = undefined;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
     it('should require at least one day when provided', async () => {
       dto.days_of_week = [];
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const daysErrors = errors.filter((e) => e.property === 'days_of_week');
       expect(daysErrors.length).toBeGreaterThan(0);
     });
 
     it('should validate enum values when provided', async () => {
       dto.days_of_week = ['INVALID_DAY'] as any;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const daysErrors = errors.filter((e) => e.property === 'days_of_week');
       expect(daysErrors.length).toBeGreaterThan(0);
     });
 
     it('should accept valid days', async () => {
       dto.days_of_week = [DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY];
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
   });
@@ -178,20 +201,23 @@ describe('UpdateInstructionalCourseDto', () => {
   describe('institution_id validation', () => {
     it('should be optional', async () => {
       dto.institution_id = undefined;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
     it('should validate UUID format when provided', async () => {
       dto.institution_id = 'not-a-uuid';
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const idErrors = errors.filter((e) => e.property === 'institution_id');
       expect(idErrors.length).toBeGreaterThan(0);
     });
 
     it('should accept valid UUID', async () => {
       dto.institution_id = '123e4567-e89b-12d3-a456-426614174000';
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
   });
@@ -199,20 +225,23 @@ describe('UpdateInstructionalCourseDto', () => {
   describe('instructor_id validation', () => {
     it('should be optional', async () => {
       dto.instructor_id = undefined;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
     it('should validate UUID format when provided', async () => {
       dto.instructor_id = 'not-a-uuid';
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const idErrors = errors.filter((e) => e.property === 'instructor_id');
       expect(idErrors.length).toBeGreaterThan(0);
     });
 
     it('should accept valid UUID', async () => {
       dto.instructor_id = '123e4567-e89b-12d3-a456-426614174000';
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
   });
@@ -220,13 +249,15 @@ describe('UpdateInstructionalCourseDto', () => {
   describe('proctor_ids validation', () => {
     it('should be optional', async () => {
       dto.proctor_ids = undefined;
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
 
     it('should validate UUID format when provided', async () => {
       dto.proctor_ids = ['not-a-uuid'];
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       const proctorErrors = errors.filter((e) => e.property === 'proctor_ids');
       expect(proctorErrors.length).toBeGreaterThan(0);
     });
@@ -236,7 +267,8 @@ describe('UpdateInstructionalCourseDto', () => {
         '123e4567-e89b-12d3-a456-426614174002',
         '123e4567-e89b-12d3-a456-426614174003',
       ];
-      const errors = await validate(dto);
+      const instance = plainToInstance(UpdateInstructionalCourseDto, dto);
+      const errors = await validate(instance);
       expect(errors.length).toBe(0);
     });
   });

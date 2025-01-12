@@ -9,6 +9,7 @@ import {
 import { LearningInstitution } from '../entities/learning-institution.entity';
 import { User } from '../../users/entities/user.entity';
 import { TUserRole } from '../../users/types';
+import { NotFoundException } from '@nestjs/common';
 
 describe('InstructionalCoursesService', () => {
   let service: InstructionalCoursesService;
@@ -150,18 +151,11 @@ describe('InstructionalCoursesService', () => {
       expect(result).toEqual(mockCourse);
     });
 
-    it('should return null if course is not found', async () => {
+    it('should throw NotFoundException if course is not found', async () => {
       jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null);
-
-      const result = await service.findOne('nonexistent-id');
-
-      expect(result).toBeNull();
-    });
-
-    it('should return null for non-existent course', async () => {
-      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null);
-      const result = await service.findOne('non-existent-id');
-      expect(result).toBeNull();
+      await expect(service.findOne('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should return course with related entities', async () => {
@@ -182,34 +176,32 @@ describe('InstructionalCoursesService', () => {
         description: 'Updated description',
       };
 
-      const mockUpdateResult: UpdateResult = {
-        affected: 1,
-        raw: [],
-        generatedMaps: [],
+      const updatedCourse = {
+        ...mockCourse,
+        ...updateDto,
       };
-      jest.spyOn(repository, 'update').mockResolvedValueOnce(mockUpdateResult);
+
+      jest
+        .spyOn(repository, 'findOne')
+        .mockResolvedValueOnce(mockCourse)
+        .mockResolvedValueOnce(updatedCourse);
 
       const result = await service.update(mockCourse.id, updateDto);
 
       expect(repository.update).toHaveBeenCalledWith(mockCourse.id, updateDto);
-      expect(result).toEqual(mockCourse);
+      expect(result).toEqual(updatedCourse);
     });
 
-    it('should handle non-existent course update', async () => {
-      const mockUpdateResult: UpdateResult = {
-        affected: 0,
-        raw: [],
-        generatedMaps: [],
-      };
-      jest.spyOn(repository, 'update').mockResolvedValueOnce(mockUpdateResult);
+    it('should throw NotFoundException when updating non-existent course', async () => {
       jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null);
 
       const updateDto = {
         name: 'Updated Course Name',
       };
 
-      const result = await service.update('non-existent-id', updateDto);
-      expect(result).toBeNull();
+      await expect(
+        service.update('non-existent-id', updateDto),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should update course with new instructor', async () => {
@@ -237,6 +229,7 @@ describe('InstructionalCoursesService', () => {
 
       jest
         .spyOn(repository, 'findOne')
+        .mockResolvedValueOnce(mockCourse)
         .mockResolvedValueOnce(updatedMockCourse);
 
       const result = await service.update(mockCourse.id, updateDto);
@@ -258,14 +251,11 @@ describe('InstructionalCoursesService', () => {
       expect(repository.delete).toHaveBeenCalledWith(mockCourse.id);
     });
 
-    it('should handle non-existent course removal', async () => {
-      const mockDeleteResult: DeleteResult = {
-        affected: 0,
-        raw: [],
-      };
-      jest.spyOn(repository, 'delete').mockResolvedValueOnce(mockDeleteResult);
-      await service.remove('non-existent-id');
-      expect(repository.delete).toHaveBeenCalledWith('non-existent-id');
+    it('should throw NotFoundException when removing non-existent course', async () => {
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null);
+      await expect(service.remove('non-existent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

@@ -7,8 +7,10 @@ import { ExamTemplateSection } from './entities/exam-template-section.entity';
 import { ExamTemplateSectionQuestion } from './entities/exam-template-section-question.entity';
 import { LearningInstitutionsController } from './controllers/learning-institutions.controller';
 import { LearningInstitutionsService } from './services/learning-institutions.service';
-import { ExamTemplatesController } from './controllers/exam-templates.controller';
-import { ExamTemplatesService } from './services/exam-templates.service';
+import { InstructionalCoursesController } from './controllers/instructional-courses.controller';
+import { InstructionalCoursesService } from './services/instructional-courses.service';
+import { ExamTemplateSectionsController } from './controllers/exam-template-sections.controller';
+import { ExamTemplateSectionsService } from './services/exam-template-sections.service';
 
 @Module({
   imports: [
@@ -20,8 +22,20 @@ import { ExamTemplatesService } from './services/exam-templates.service';
       ExamTemplateSectionQuestion,
     ]),
   ],
-  providers: [LearningInstitutionsService, ExamTemplatesService],
-  controllers: [LearningInstitutionsController, ExamTemplatesController],
-  exports: [LearningInstitutionsService, ExamTemplatesService],
+  controllers: [
+    LearningInstitutionsController,
+    InstructionalCoursesController,
+    ExamTemplateSectionsController,
+  ],
+  providers: [
+    LearningInstitutionsService,
+    InstructionalCoursesService,
+    ExamTemplateSectionsService,
+  ],
+  exports: [
+    LearningInstitutionsService,
+    InstructionalCoursesService,
+    ExamTemplateSectionsService,
+  ],
 })
 export class LearningModule {}

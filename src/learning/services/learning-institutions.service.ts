@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LearningInstitution } from '../entities/learning-institution.entity';
@@ -33,19 +33,25 @@ export class LearningInstitutionsService {
       where: { id },
       relations: ['courses'],
     });
-    return institution ? this.toDto(institution) : null;
+    if (!institution) {
+      throw new NotFoundException(
+        `Learning institution with ID "${id}" not found`,
+      );
+    }
+    return this.toDto(institution);
   }
 
   async update(
     id: string,
     data: UpdateLearningInstitutionDto,
   ): Promise<LearningInstitutionDto> {
+    const institution = await this.findOne(id);
     await this.institutionRepository.update(id, data);
-    const updated = await this.findOne(id);
-    return updated;
+    return this.findOne(id);
   }
 
   async remove(id: string): Promise<void> {
+    const institution = await this.findOne(id);
     await this.institutionRepository.delete(id);
   }
 
