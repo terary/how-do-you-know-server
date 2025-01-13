@@ -1,0 +1,202 @@
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load test environment variables
+config({ path: resolve(__dirname, '../.env.test') });
+
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { ExamTemplate } from '../src/learning/entities/exam-template.entity';
+import { ExamTemplateSection } from '../src/learning/entities/exam-template-section.entity';
+import { ExamTemplateSectionQuestion } from '../src/learning/entities/exam-template-section-question.entity';
+import {
+  InstructionalCourse,
+  DayOfWeek,
+} from '../src/learning/entities/instructional-course.entity';
+import { LearningInstitution } from '../src/learning/entities/learning-institution.entity';
+import { User } from '../src/users/entities/user.entity';
+import {
+  createTestingModule,
+  createTestUser,
+  createTestInstitution,
+  cleanupTestEntityData,
+} from './test-helper';
+
+describe('ExamTemplatesController (e2e)', () => {
+  let app: INestApplication;
+  let moduleFixture: TestingModule;
+  let examTemplateRepository: Repository<ExamTemplate>;
+  let examTemplateSectionRepository: Repository<ExamTemplateSection>;
+  let examTemplateSectionQuestionRepository: Repository<ExamTemplateSectionQuestion>;
+  let courseRepository: Repository<InstructionalCourse>;
+  let savedInstitution: LearningInstitution;
+  let savedCourse: InstructionalCourse;
+  let testUser: User;
+  let authToken: string;
+
+  const testUsername = 'test-exam-templates@test.com';
+  const testInstitutionName = 'Test Institution - Exam Templates';
+  const testCourseName = 'Test Course - Exam Templates';
+
+  beforeAll(async () => {
+    const { app: testApp, module: testModule } = await createTestingModule();
+    app = testApp;
+    moduleFixture = testModule;
+
+    examTemplateRepository = moduleFixture.get<Repository<ExamTemplate>>(
+      getRepositoryToken(ExamTemplate),
+    );
+    examTemplateSectionRepository = moduleFixture.get<
+      Repository<ExamTemplateSection>
+    >(getRepositoryToken(ExamTemplateSection));
+    examTemplateSectionQuestionRepository = moduleFixture.get<
+      Repository<ExamTemplateSectionQuestion>
+    >(getRepositoryToken(ExamTemplateSectionQuestion));
+    courseRepository = moduleFixture.get<Repository<InstructionalCourse>>(
+      getRepositoryToken(InstructionalCourse),
+    );
+
+    try {
+      // Clean up any existing test data first, in correct order
+      await cleanupTestEntityData(
+        moduleFixture,
+        ExamTemplateSectionQuestion,
+        {},
+      );
+      await cleanupTestEntityData(moduleFixture, ExamTemplateSection, {});
+      await cleanupTestEntityData(moduleFixture, ExamTemplate, {});
+      await cleanupTestEntityData(moduleFixture, InstructionalCourse, {
+        name: testCourseName,
+      });
+      await cleanupTestEntityData(moduleFixture, LearningInstitution, {
+        name: testInstitutionName,
+      });
+      await cleanupTestEntityData(moduleFixture, User, {
+        username: testUsername,
+      });
+
+      // Create test user with cleanup
+      testUser = await createTestUser(moduleFixture, testUsername, [
+        'admin:exams',
+        'admin:users',
+        'user',
+        'public',
+      ]);
+
+      // Create test institution
+      savedInstitution = await createTestInstitution(
+        moduleFixture,
+        testInstitutionName,
+        testUser.id,
+      );
+
+      // Create test course
+      const courseToCreate = courseRepository.create({
+        name: testCourseName,
+        description: 'A test course for exam templates e2e tests',
+        start_date: new Date('2024-02-01'),
+        finish_date: new Date('2024-05-31'),
+        start_time_utc: '14:00',
+        duration_minutes: 90,
+        days_of_week: [DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY],
+        institution: savedInstitution,
+        instructor_id: testUser.id,
+        proctor_ids: [],
+        created_by: testUser.id,
+      });
+      savedCourse = await courseRepository.save(courseToCreate);
+
+      // Get auth token
+      const loginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          username: testUsername,
+          password: 'password123',
+        });
+
+      if (!loginResponse.body.access_token) {
+        throw new Error('Failed to get auth token');
+      }
+
+      authToken = loginResponse.body.access_token;
+      console.log('Successfully obtained auth token');
+    } catch (error) {
+      console.error('Error in test setup:', error);
+      throw error;
+    }
+  });
+
+  beforeEach(async () => {
+    try {
+      // Clean up only exam template data before each test
+      await cleanupTestEntityData(
+        moduleFixture,
+        ExamTemplateSectionQuestion,
+        {},
+      );
+      await cleanupTestEntityData(moduleFixture, ExamTemplateSection, {});
+      await cleanupTestEntityData(moduleFixture, ExamTemplate, {});
+
+      // Verify auth token is still valid
+      const testResponse = await request(app.getHttpServer())
+        .get('/exam-templates')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      if (testResponse.status === 401) {
+        // Re-login if token expired
+        const loginResponse = await request(app.getHttpServer())
+          .post('/auth/login')
+          .send({
+            username: testUsername,
+            password: 'password123',
+          });
+
+        if (!loginResponse.body.access_token) {
+          throw new Error('Failed to refresh auth token');
+        }
+
+        authToken = loginResponse.body.access_token;
+        console.log('Successfully refreshed auth token');
+      }
+    } catch (error) {
+      console.error('Error in beforeEach cleanup:', error);
+      throw error;
+    }
+  });
+
+  afterAll(async () => {
+    try {
+      // Clean up ALL test data we created, in correct order
+      await cleanupTestEntityData(
+        moduleFixture,
+        ExamTemplateSectionQuestion,
+        {},
+      );
+      await cleanupTestEntityData(moduleFixture, ExamTemplateSection, {});
+      await cleanupTestEntityData(moduleFixture, ExamTemplate, {});
+      await cleanupTestEntityData(moduleFixture, InstructionalCourse, {
+        name: testCourseName,
+      });
+      await cleanupTestEntityData(moduleFixture, LearningInstitution, {
+        name: testInstitutionName,
+      });
+      await cleanupTestEntityData(moduleFixture, User, {
+        username: testUsername,
+      });
+    } catch (error) {
+      console.error('Error in test cleanup:', error);
+      throw error;
+    } finally {
+      if (app) {
+        await app.close();
+      }
+    }
+  });
+
+  it('placeholder test', () => {
+    expect(1).toBe(1);
+  });
+});

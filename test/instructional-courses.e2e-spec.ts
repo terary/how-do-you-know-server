@@ -1,6 +1,5 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import * as bcrypt from 'bcrypt';
 
 // Load test environment variables
 config({ path: resolve(__dirname, '../.env.test') });
@@ -8,26 +7,32 @@ config({ path: resolve(__dirname, '../.env.test') });
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
-import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import {
   InstructionalCourse,
   DayOfWeek,
 } from '../src/learning/entities/instructional-course.entity';
 import { LearningInstitution } from '../src/learning/entities/learning-institution.entity';
 import { User } from '../src/users/entities/user.entity';
-import { createTestingModule } from './test-helper';
+import {
+  createTestingModule,
+  createTestUser,
+  createTestInstitution,
+  cleanupTestEntityData,
+} from './test-helper';
 
 describe('InstructionalCoursesController (e2e)', () => {
   let app: INestApplication;
   let moduleFixture: TestingModule;
   let courseRepository: Repository<InstructionalCourse>;
-  let institutionRepository: Repository<LearningInstitution>;
-  let userRepository: Repository<User>;
   let savedInstitution: LearningInstitution;
   let testUser: User;
   let authToken: string;
+
+  const testUsername = 'test-instructional-courses@test.com';
+  const testInstitutionName = 'Test Institution - Instructional Courses';
+  const testCourseName = 'Test Course - Instructional Courses';
 
   beforeAll(async () => {
     const { app: testApp, module: testModule } = await createTestingModule();
@@ -37,89 +42,103 @@ describe('InstructionalCoursesController (e2e)', () => {
     courseRepository = moduleFixture.get<Repository<InstructionalCourse>>(
       getRepositoryToken(InstructionalCourse),
     );
-    institutionRepository = moduleFixture.get<Repository<LearningInstitution>>(
-      getRepositoryToken(LearningInstitution),
-    );
-    userRepository = moduleFixture.get<Repository<User>>(
-      getRepositoryToken(User),
-    );
 
-    // Clean up any existing test data from this suite
-    await courseRepository.delete({});
-    await institutionRepository.delete({
-      name: 'Test Institution - Instructional Courses',
-    });
-    await userRepository.delete({
-      username: 'test-instructional-courses@test.com',
-    });
-
-    // Create our own test user with a unique identifier for this test suite
-    const testUsername = 'test-instructional-courses@test.com';
-    testUser = await userRepository.findOne({
-      where: { username: testUsername },
-    });
-
-    if (!testUser) {
-      const hashedPassword = await bcrypt.hash('password123', 10);
-      const userToCreate = userRepository.create({
-        username: testUsername,
-        password: hashedPassword,
-        firstName: 'Test',
-        lastName: 'Instructional Courses',
-        email: testUsername,
-        roles: ['admin:exams', 'admin:users', 'user', 'public'],
+    try {
+      // Clean up any existing test data first, in correct order
+      await cleanupTestEntityData(moduleFixture, InstructionalCourse, {
+        name: testCourseName,
       });
-      testUser = await userRepository.save(userToCreate);
+      await cleanupTestEntityData(moduleFixture, LearningInstitution, {
+        name: testInstitutionName,
+      });
+      await cleanupTestEntityData(moduleFixture, User, {
+        username: testUsername,
+      });
+
+      // Create test user with cleanup
+      testUser = await createTestUser(moduleFixture, testUsername, [
+        'admin:exams',
+        'admin:users',
+        'user',
+        'public',
+      ]);
+
+      // Create test institution
+      savedInstitution = await createTestInstitution(
+        moduleFixture,
+        testInstitutionName,
+        testUser.id,
+      );
+
+      // Get auth token
+      const loginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          username: testUsername,
+          password: 'password123',
+        });
+
+      if (!loginResponse.body.access_token) {
+        throw new Error('Failed to get auth token');
+      }
+
+      authToken = loginResponse.body.access_token;
+      console.log('Successfully obtained auth token');
+    } catch (error) {
+      console.error('Error in test setup:', error);
+      throw error;
     }
-
-    // Get auth token
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: testUsername,
-        password: 'password123',
-      });
-
-    authToken = loginResponse.body.access_token;
-
-    // Create a test institution with a unique identifier for this test suite
-    const institutionToCreate = institutionRepository.create({
-      name: 'Test Institution - Instructional Courses',
-      description: 'A test institution for instructional courses e2e tests',
-      website: 'https://test-instructional-courses.com',
-      email: 'institution@test-instructional-courses.com',
-      phone: '1234567890',
-      address: '123 Test St',
-      created_by: testUser.id,
-    });
-    savedInstitution = await institutionRepository.save(institutionToCreate);
   });
 
   beforeEach(async () => {
-    // Clean up only course data before each test
-    await courseRepository.delete({
-      institution: { id: savedInstitution.id },
-    });
+    try {
+      // Clean up only course data before each test
+      await cleanupTestEntityData(moduleFixture, InstructionalCourse, {
+        name: testCourseName,
+      });
+
+      // Verify auth token is still valid
+      const testResponse = await request(app.getHttpServer())
+        .get('/instructional-courses')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      if (testResponse.status === 401) {
+        // Re-login if token expired
+        const loginResponse = await request(app.getHttpServer())
+          .post('/auth/login')
+          .send({
+            username: testUsername,
+            password: 'password123',
+          });
+
+        if (!loginResponse.body.access_token) {
+          throw new Error('Failed to refresh auth token');
+        }
+
+        authToken = loginResponse.body.access_token;
+        console.log('Successfully refreshed auth token');
+      }
+    } catch (error) {
+      console.error('Error in beforeEach cleanup:', error);
+      throw error;
+    }
   });
 
   afterAll(async () => {
     try {
       // Clean up ALL test data we created, in correct order
-      if (courseRepository && savedInstitution) {
-        await courseRepository.delete({
-          institution: { id: savedInstitution.id },
-        });
-      }
-      if (institutionRepository && savedInstitution) {
-        await institutionRepository.delete({
-          id: savedInstitution.id,
-        });
-      }
-      if (userRepository) {
-        await userRepository.delete({
-          username: 'test-instructional-courses@test.com',
-        });
-      }
+      await cleanupTestEntityData(moduleFixture, InstructionalCourse, {
+        name: testCourseName,
+      });
+      await cleanupTestEntityData(moduleFixture, LearningInstitution, {
+        name: testInstitutionName,
+      });
+      await cleanupTestEntityData(moduleFixture, User, {
+        username: testUsername,
+      });
+    } catch (error) {
+      console.error('Error in test cleanup:', error);
+      throw error;
     } finally {
       if (app) {
         await app.close();
@@ -130,9 +149,9 @@ describe('InstructionalCoursesController (e2e)', () => {
   describe('POST /instructional-courses', () => {
     it('should create a new instructional course', () => {
       const createDto = {
-        name: 'Test Course',
+        name: testCourseName,
         description: 'A test course for e2e testing',
-        institution: savedInstitution,
+        institution_id: savedInstitution.id,
         start_date: new Date('2024-01-01'),
         finish_date: new Date('2024-12-31'),
         start_time_utc: '14:00',
@@ -162,8 +181,8 @@ describe('InstructionalCoursesController (e2e)', () => {
   describe('GET /instructional-courses', () => {
     it('should return all instructional courses', async () => {
       // Create test course
-      const courseToCreate = courseRepository.create({
-        name: 'Test Course',
+      const course = await courseRepository.save({
+        name: testCourseName,
         description: 'A test course for e2e testing',
         institution: savedInstitution,
         start_date: new Date('2024-01-01'),
@@ -175,7 +194,6 @@ describe('InstructionalCoursesController (e2e)', () => {
         proctor_ids: [],
         created_by: testUser.id,
       });
-      const course = await courseRepository.save(courseToCreate);
 
       return request(app.getHttpServer())
         .get('/instructional-courses')
@@ -183,17 +201,19 @@ describe('InstructionalCoursesController (e2e)', () => {
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body[0].id).toBe(course.id);
-          expect(res.body[0].name).toBe(course.name);
-          expect(res.body[0].institution_id).toBe(savedInstitution.id);
+          expect(res.body.length).toBeGreaterThan(0);
+          const testCourse = res.body.find((c: any) => c.id === course.id);
+          expect(testCourse).toBeDefined();
+          expect(testCourse.name).toBe(course.name);
+          expect(testCourse.institution_id).toBe(savedInstitution.id);
         });
     });
   });
 
   describe('GET /instructional-courses/:id', () => {
     it('should return a specific instructional course', async () => {
-      const courseToCreate = courseRepository.create({
-        name: 'Test Course',
+      const course = await courseRepository.save({
+        name: testCourseName,
         description: 'A test course for e2e testing',
         institution: savedInstitution,
         start_date: new Date('2024-01-01'),
@@ -205,7 +225,6 @@ describe('InstructionalCoursesController (e2e)', () => {
         proctor_ids: [],
         created_by: testUser.id,
       });
-      const course = await courseRepository.save(courseToCreate);
 
       return request(app.getHttpServer())
         .get(`/instructional-courses/${course.id}`)
@@ -228,8 +247,8 @@ describe('InstructionalCoursesController (e2e)', () => {
 
   describe('PATCH /instructional-courses/:id', () => {
     it('should update an instructional course', async () => {
-      const courseToCreate = courseRepository.create({
-        name: 'Test Course',
+      const course = await courseRepository.save({
+        name: testCourseName,
         description: 'A test course for e2e testing',
         institution: savedInstitution,
         start_date: new Date('2024-01-01'),
@@ -241,10 +260,9 @@ describe('InstructionalCoursesController (e2e)', () => {
         proctor_ids: [],
         created_by: testUser.id,
       });
-      const course = await courseRepository.save(courseToCreate);
 
       const updateDto = {
-        name: 'Updated Course Name',
+        name: `${testCourseName} Updated`,
         description: 'Updated course description',
         start_date: new Date('2024-02-01'),
       };
@@ -265,8 +283,8 @@ describe('InstructionalCoursesController (e2e)', () => {
 
   describe('DELETE /instructional-courses/:id', () => {
     it('should delete an instructional course', async () => {
-      const courseToCreate = courseRepository.create({
-        name: 'Test Course',
+      const course = await courseRepository.save({
+        name: testCourseName,
         description: 'A test course for e2e testing',
         institution: savedInstitution,
         start_date: new Date('2024-01-01'),
@@ -278,7 +296,6 @@ describe('InstructionalCoursesController (e2e)', () => {
         proctor_ids: [],
         created_by: testUser.id,
       });
-      const course = await courseRepository.save(courseToCreate);
 
       return request(app.getHttpServer())
         .delete(`/instructional-courses/${course.id}`)

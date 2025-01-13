@@ -1,6 +1,5 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import * as bcrypt from 'bcrypt';
 
 // Load test environment variables
 config({ path: resolve(__dirname, '../.env.test') });
@@ -8,25 +7,24 @@ config({ path: resolve(__dirname, '../.env.test') });
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../src/users/entities/user.entity';
-import { TUserRole } from '../src/users/types';
 import { LearningInstitution } from '../src/learning/entities/learning-institution.entity';
-import { createTestingModule } from './test-helper';
+import {
+  createTestingModule,
+  createTestUser,
+  cleanupTestEntityData,
+} from './test-helper';
 
 describe('LearningInstitutionsController (e2e)', () => {
   let app: INestApplication;
   let moduleFixture: TestingModule;
   let institutionRepository: Repository<LearningInstitution>;
-  let userRepository: Repository<User>;
   let savedUser: User;
   let authToken: string;
-  const mockUser = {
-    id: undefined as string | undefined,
-    roles: ['admin:exams'],
-  };
+  const testUsername = 'test-learning-institutions@test.com';
+  const testInstitutionName = 'Test University - Learning Institutions';
 
   beforeAll(async () => {
     // Create the app and module
@@ -35,57 +33,89 @@ describe('LearningInstitutionsController (e2e)', () => {
     moduleFixture = testModule;
 
     // Get repositories
-    userRepository = moduleFixture.get<Repository<User>>(
-      getRepositoryToken(User),
-    );
     institutionRepository = moduleFixture.get<Repository<LearningInstitution>>(
       getRepositoryToken(LearningInstitution),
     );
 
-    // Clean up any existing test data from this suite
-    await institutionRepository.delete({});
-    await userRepository.delete({
-      username: 'test-learning-institutions@test.com',
-    });
-
-    // Create test user
-    const testUser = userRepository.create({
-      username: 'test-learning-institutions@test.com',
-      firstName: 'Test',
-      lastName: 'Learning Institutions',
-      email: 'test-learning-institutions@test.com',
-      password: await bcrypt.hash('password123', 10),
-      roles: ['admin:exams'] as TUserRole[],
-    });
-    savedUser = await userRepository.save(testUser);
-    mockUser.id = savedUser.id;
-
-    // Login to get auth token
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        username: 'test-learning-institutions@test.com',
-        password: 'password123',
+    try {
+      // Clean up any existing test data first
+      await cleanupTestEntityData(moduleFixture, LearningInstitution, {
+        name: testInstitutionName,
       });
-    authToken = loginResponse.body.access_token;
+      await cleanupTestEntityData(moduleFixture, User, {
+        username: testUsername,
+      });
+
+      // Create test user with cleanup
+      savedUser = await createTestUser(moduleFixture, testUsername, [
+        'admin:exams',
+      ]);
+
+      // Login to get auth token
+      const loginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          username: testUsername,
+          password: 'password123',
+        });
+
+      if (!loginResponse.body.access_token) {
+        throw new Error('Failed to get auth token');
+      }
+
+      authToken = loginResponse.body.access_token;
+      console.log('Successfully obtained auth token');
+    } catch (error) {
+      console.error('Error in test setup:', error);
+      throw error;
+    }
   });
 
   beforeEach(async () => {
-    // Clean up only institution data before each test
-    await institutionRepository.delete({});
+    try {
+      // Clean up only institution data before each test
+      await cleanupTestEntityData(moduleFixture, LearningInstitution, {
+        name: testInstitutionName,
+      });
+
+      // Verify auth token is still valid
+      const testResponse = await request(app.getHttpServer())
+        .get('/learning-institutions')
+        .set('Authorization', `Bearer ${authToken}`);
+
+      if (testResponse.status === 401) {
+        // Re-login if token expired
+        const loginResponse = await request(app.getHttpServer())
+          .post('/auth/login')
+          .send({
+            username: testUsername,
+            password: 'password123',
+          });
+
+        if (!loginResponse.body.access_token) {
+          throw new Error('Failed to refresh auth token');
+        }
+
+        authToken = loginResponse.body.access_token;
+        console.log('Successfully refreshed auth token');
+      }
+    } catch (error) {
+      console.error('Error in beforeEach cleanup:', error);
+      throw error;
+    }
   });
 
   afterAll(async () => {
     try {
       // Clean up ALL test data we created
-      if (institutionRepository) {
-        await institutionRepository.delete({});
-      }
-      if (userRepository) {
-        await userRepository.delete({
-          username: 'test-learning-institutions@test.com',
-        });
-      }
+      await cleanupTestEntityData(moduleFixture, LearningInstitution, {
+        name: testInstitutionName,
+      });
+      await cleanupTestEntityData(moduleFixture, User, {
+        username: testUsername,
+      });
+    } catch (error) {
+      console.error('Error in test cleanup:', error);
     } finally {
       if (app) {
         await app.close();
@@ -96,7 +126,7 @@ describe('LearningInstitutionsController (e2e)', () => {
   describe('POST /learning-institutions', () => {
     it('should create a new learning institution', () => {
       const createDto = {
-        name: 'Test University',
+        name: testInstitutionName,
         description: 'A test university for e2e testing',
         website: 'https://test.edu',
         email: 'contact@test.edu',
@@ -117,7 +147,7 @@ describe('LearningInstitutionsController (e2e)', () => {
           expect(res.body.email).toBe(createDto.email);
           expect(res.body.phone).toBe(createDto.phone);
           expect(res.body.address).toBe(createDto.address);
-          expect(res.body.created_by).toBe(mockUser.id);
+          expect(res.body.created_by).toBe(savedUser.id);
         });
     });
   });
@@ -126,13 +156,13 @@ describe('LearningInstitutionsController (e2e)', () => {
     it('should return all learning institutions', async () => {
       // Create test data
       const institution = await institutionRepository.save({
-        name: 'Test University',
+        name: testInstitutionName,
         description: 'A test university for e2e testing',
         website: 'https://test.edu',
         email: 'contact@test.edu',
         phone: '123-456-7890',
         address: '123 Test St, Test City, TS 12345',
-        created_by: mockUser.id,
+        created_by: savedUser.id,
       });
 
       return request(app.getHttpServer())
@@ -141,8 +171,12 @@ describe('LearningInstitutionsController (e2e)', () => {
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body[0].id).toBe(institution.id);
-          expect(res.body[0].name).toBe(institution.name);
+          expect(res.body.length).toBeGreaterThan(0);
+          const testInstitution = res.body.find(
+            (inst: any) => inst.id === institution.id,
+          );
+          expect(testInstitution).toBeDefined();
+          expect(testInstitution.name).toBe(institution.name);
         });
     });
   });
@@ -150,13 +184,13 @@ describe('LearningInstitutionsController (e2e)', () => {
   describe('GET /learning-institutions/:id', () => {
     it('should return a specific learning institution', async () => {
       const institution = await institutionRepository.save({
-        name: 'Test University',
+        name: testInstitutionName,
         description: 'A test university for e2e testing',
         website: 'https://test.edu',
         email: 'contact@test.edu',
         phone: '123-456-7890',
         address: '123 Test St, Test City, TS 12345',
-        created_by: mockUser.id,
+        created_by: savedUser.id,
       });
 
       return request(app.getHttpServer())
@@ -180,17 +214,17 @@ describe('LearningInstitutionsController (e2e)', () => {
   describe('PATCH /learning-institutions/:id', () => {
     it('should update a learning institution', async () => {
       const institution = await institutionRepository.save({
-        name: 'Test University',
+        name: testInstitutionName,
         description: 'A test university for e2e testing',
         website: 'https://test.edu',
         email: 'contact@test.edu',
         phone: '123-456-7890',
         address: '123 Test St, Test City, TS 12345',
-        created_by: mockUser.id,
+        created_by: savedUser.id,
       });
 
       const updateDto = {
-        name: 'Updated University Name',
+        name: `${testInstitutionName} Updated`,
         description: 'Updated university description',
         website: 'https://updated.edu',
       };
@@ -213,13 +247,13 @@ describe('LearningInstitutionsController (e2e)', () => {
   describe('DELETE /learning-institutions/:id', () => {
     it('should delete a learning institution', async () => {
       const institution = await institutionRepository.save({
-        name: 'Test University',
+        name: testInstitutionName,
         description: 'A test university for e2e testing',
         website: 'https://test.edu',
         email: 'contact@test.edu',
         phone: '123-456-7890',
         address: '123 Test St, Test City, TS 12345',
-        created_by: mockUser.id,
+        created_by: savedUser.id,
       });
 
       return request(app.getHttpServer())
