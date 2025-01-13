@@ -27,10 +27,10 @@ export class CreateExamTemplateDto {
 
   @ApiProperty({
     description: 'The type of exam exclusivity',
-    enum: ['exam-only', 'practice-only', 'exam-practice-both'],
+    enum: ExamExclusivityType,
     example: 'exam-practice-both',
   })
-  @IsEnum(['exam-only', 'practice-only', 'exam-practice-both'])
+  @IsEnum(ExamExclusivityType)
   examExclusivityType: ExamExclusivityType;
 
   @ApiProperty({

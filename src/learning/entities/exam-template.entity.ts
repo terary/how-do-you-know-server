@@ -11,10 +11,11 @@ import {
 import { InstructionalCourse } from './instructional-course.entity';
 import { ExamTemplateSection } from './exam-template-section.entity';
 
-export type ExamExclusivityType =
-  | 'exam-only'
-  | 'practice-only'
-  | 'exam-practice-both';
+export enum ExamExclusivityType {
+  EXAM_ONLY = 'exam-only',
+  PRACTICE_ONLY = 'practice-only',
+  EXAM_PRACTICE_BOTH = 'exam-practice-both',
+}
 
 @Entity('exam_templates')
 export class ExamTemplate {

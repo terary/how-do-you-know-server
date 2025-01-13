@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
-import { InstructionalCourse } from '../src/learning/entities/instructional-course.entity';
+import { ExamTemplate } from '../src/learning/entities/exam-template.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
   setupTestDatabase,
@@ -9,22 +9,22 @@ import {
   cleanupTestEntityData,
 } from './test-helper';
 
-describe('InstructionalCoursesController (e2e)', () => {
+describe('ExamTemplatesController (e2e)', () => {
   let app: INestApplication;
   let module: TestingModule;
-  let instructionalCourseRepository: Repository<InstructionalCourse>;
+  let examTemplateRepository: Repository<ExamTemplate>;
 
   beforeAll(async () => {
     const testSetup = await setupTestDatabase();
     app = testSetup.app;
     module = testSetup.module;
-    instructionalCourseRepository = module.get<Repository<InstructionalCourse>>(
-      getRepositoryToken(InstructionalCourse),
+    examTemplateRepository = module.get<Repository<ExamTemplate>>(
+      getRepositoryToken(ExamTemplate),
     );
   });
 
   beforeEach(async () => {
-    await cleanupTestEntityData(module, InstructionalCourse, {});
+    await cleanupTestEntityData(module, ExamTemplate, {});
   });
 
   afterAll(async () => {
@@ -35,7 +35,7 @@ describe('InstructionalCoursesController (e2e)', () => {
     expect(1).toBe(1);
   });
 
-  describe.skip('instructional course tests', () => {
+  describe.skip('exam template tests', () => {
     // Skipped tests here
   });
 });

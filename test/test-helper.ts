@@ -33,31 +33,50 @@ export const setupTestDatabase = async () => {
 
     await testDataSource.initialize();
   }
+
+  if (!testModule) {
+    testModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          envFilePath: '.env',
+        }),
+        AppModule,
+      ],
+    }).compile();
+  }
+
+  if (!testApp) {
+    testApp = testModule.createNestApplication({
+      cors: true,
+      logger: console,
+    });
+    await testApp.init();
+  }
+
+  return { app: testApp, module: testModule };
 };
 
 export const cleanupTestDatabase = async () => {
-  if (testDataSource && testDataSource.isInitialized) {
-    await testDataSource.destroy();
+  try {
+    if (testApp) {
+      await testApp.close();
+      testApp = null;
+    }
+
+    if (testModule) {
+      await testModule.close();
+      testModule = null;
+    }
+
+    if (testDataSource && testDataSource.isInitialized) {
+      await testDataSource.destroy();
+      testDataSource = null;
+    }
+  } catch (error) {
+    console.error('Error during database cleanup:', error);
+    throw error;
   }
-};
-
-export const createTestingModule = async () => {
-  await setupTestDatabase();
-
-  testModule = await Test.createTestingModule({
-    imports: [
-      ConfigModule.forRoot({
-        isGlobal: true,
-        envFilePath: '.env',
-      }),
-      AppModule,
-    ],
-  }).compile();
-
-  testApp = testModule.createNestApplication();
-  await testApp.init();
-
-  return { app: testApp, module: testModule };
 };
 
 export const getTestApp = () => testApp;
@@ -82,37 +101,121 @@ export const cleanupTestEntityData = async (
         getRepositoryToken(InstructionalCourse),
       );
 
-      // Find all related courses first
-      let coursesToDelete;
+      // Delete related courses first
       if (Entity === LearningInstitution) {
-        coursesToDelete = await courseRepository
+        await courseRepository
           .createQueryBuilder('course')
-          .leftJoinAndSelect('course.institution', 'institution')
-          .where('institution.name = :name', { name: identifier.name })
-          .getMany();
+          .delete()
+          .from(InstructionalCourse)
+          .where(
+            'institution_id IN (SELECT id FROM learning_institutions WHERE name = :name)',
+            { name: identifier.name },
+          )
+          .execute();
       } else {
-        coursesToDelete = await courseRepository
+        await courseRepository
           .createQueryBuilder('course')
-          .where('course.instructor_id = :id', { id: identifier.id })
+          .delete()
+          .from(InstructionalCourse)
+          .where('instructor_id = :id', { id: identifier.id })
+          .execute();
+      }
+    } else if (
+      Entity === ExamTemplate ||
+      Entity === ExamTemplateSection ||
+      Entity === ExamTemplateSectionQuestion
+    ) {
+      // For exam template entities, ensure we clean up in the correct order
+      const questionRepository = module.get<
+        Repository<ExamTemplateSectionQuestion>
+      >(getRepositoryToken(ExamTemplateSectionQuestion));
+      const sectionRepository = module.get<Repository<ExamTemplateSection>>(
+        getRepositoryToken(ExamTemplateSection),
+      );
+      const templateRepository = module.get<Repository<ExamTemplate>>(
+        getRepositoryToken(ExamTemplate),
+      );
+
+      if (Entity === ExamTemplate) {
+        // Find template IDs
+        const templates = await templateRepository
+          .createQueryBuilder('template')
+          .where(identifier)
           .getMany();
-      }
 
-      // Delete each course
-      for (const course of coursesToDelete) {
-        await courseRepository.remove(course);
+        for (const template of templates) {
+          // Delete questions first
+          await questionRepository
+            .createQueryBuilder()
+            .delete()
+            .from(ExamTemplateSectionQuestion)
+            .where(
+              'section_id IN (SELECT id FROM exam_template_sections WHERE exam_template_id = :id)',
+              { id: template.id },
+            )
+            .execute();
+
+          // Delete sections
+          await sectionRepository
+            .createQueryBuilder()
+            .delete()
+            .from(ExamTemplateSection)
+            .where('exam_template_id = :id', { id: template.id })
+            .execute();
+
+          // Delete template
+          await templateRepository
+            .createQueryBuilder()
+            .delete()
+            .from(ExamTemplate)
+            .where('id = :id', { id: template.id })
+            .execute();
+        }
+        return;
+      } else if (Entity === ExamTemplateSection) {
+        // Find section IDs
+        const sections = await sectionRepository
+          .createQueryBuilder('section')
+          .where(identifier)
+          .getMany();
+
+        for (const section of sections) {
+          // Delete questions first
+          await questionRepository
+            .createQueryBuilder()
+            .delete()
+            .from(ExamTemplateSectionQuestion)
+            .where('section_id = :id', { id: section.id })
+            .execute();
+
+          // Delete section
+          await sectionRepository
+            .createQueryBuilder()
+            .delete()
+            .from(ExamTemplateSection)
+            .where('id = :id', { id: section.id })
+            .execute();
+        }
+        return;
+      } else if (Entity === ExamTemplateSectionQuestion) {
+        // Delete questions directly
+        await questionRepository
+          .createQueryBuilder()
+          .delete()
+          .from(ExamTemplateSectionQuestion)
+          .where(identifier)
+          .execute();
+        return;
       }
     }
 
-    // Find all matching records
-    const recordsToDelete = await repository
-      .createQueryBuilder(Entity.name.toLowerCase())
+    // Delete all matching records
+    await repository
+      .createQueryBuilder()
+      .delete()
+      .from(Entity)
       .where(identifier)
-      .getMany();
-
-    // Delete each record
-    for (const record of recordsToDelete) {
-      await repository.remove(record);
-    }
+      .execute();
 
     console.log(`Successfully cleaned up test data for ${Entity.name}`);
   } catch (error) {
@@ -134,7 +237,8 @@ export const createTestUser = async (
     // Clean up existing test user first
     await userRepository.delete({ username });
 
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const plainTextPassword = 'password123';
+    const hashedPassword = await bcrypt.hash(plainTextPassword, 10);
     const user = userRepository.create({
       username,
       password: hashedPassword,
@@ -146,7 +250,7 @@ export const createTestUser = async (
 
     const savedUser = await userRepository.save(user);
     console.log(`Successfully created test user: ${username}`);
-    return savedUser;
+    return { ...savedUser, plainTextPassword };
   } catch (error) {
     console.error(`Error creating test user ${username}:`, error);
     throw error;
