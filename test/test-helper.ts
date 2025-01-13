@@ -12,6 +12,7 @@ import { InstructionalCourse } from '../src/learning/entities/instructional-cour
 import { LearningInstitution } from '../src/learning/entities/learning-institution.entity';
 import * as bcrypt from 'bcrypt';
 import { TUserRole } from '../src/users/types';
+import * as request from 'supertest';
 
 let testDataSource: DataSource;
 let testModule: TestingModule;
@@ -95,7 +96,23 @@ export const cleanupTestEntityData = async (
     );
     const repository = module.get<Repository<any>>(getRepositoryToken(Entity));
 
-    if (Entity === LearningInstitution || Entity === User) {
+    if (Entity === InstructionalCourse) {
+      // For InstructionalCourse, first cleanup exam templates that reference it
+      const examTemplateRepository = module.get<Repository<ExamTemplate>>(
+        getRepositoryToken(ExamTemplate),
+      );
+      const courses = await repository
+        .createQueryBuilder('course')
+        .where(identifier)
+        .getMany();
+
+      for (const course of courses) {
+        // Clean up exam templates for this course
+        await cleanupTestEntityData(module, ExamTemplate, {
+          course_id: course.id,
+        });
+      }
+    } else if (Entity === LearningInstitution || Entity === User) {
       // For entities with foreign key constraints, first cleanup their dependent records
       const courseRepository = module.get<Repository<InstructionalCourse>>(
         getRepositoryToken(InstructionalCourse),
@@ -227,30 +244,27 @@ export const cleanupTestEntityData = async (
 export const createTestUser = async (
   module: TestingModule,
   username: string,
-  roles: TUserRole[] = ['admin:exams'],
 ) => {
-  const userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-
   try {
-    console.log(`Creating test user: ${username}`);
+    // First clean up any existing user with this email
+    await cleanupTestEntityData(module, User, {
+      email: `${username}@test.com`,
+    });
 
-    // Clean up existing test user first
-    await userRepository.delete({ username });
-
-    const plainTextPassword = 'password123';
-    const hashedPassword = await bcrypt.hash(plainTextPassword, 10);
+    const userRepository = module.get<Repository<User>>(
+      getRepositoryToken(User),
+    );
+    const hashedPassword = await bcrypt.hash('password123', 10);
     const user = userRepository.create({
-      username,
+      email: `${username}@test.com`,
       password: hashedPassword,
       firstName: 'Test',
       lastName: 'User',
-      email: username,
-      roles,
+      username: username,
+      roles: ['admin:exams'],
     });
-
-    const savedUser = await userRepository.save(user);
-    console.log(`Successfully created test user: ${username}`);
-    return { ...savedUser, plainTextPassword };
+    await userRepository.save(user);
+    return user;
   } catch (error) {
     console.error(`Error creating test user ${username}:`, error);
     throw error;
@@ -341,4 +355,24 @@ export const cleanupTestData = async () => {
     console.error('Error cleaning up test data:', error);
     throw error;
   }
+};
+
+export const getAuthToken = async (
+  module: TestingModule,
+  email: string,
+  password: string = 'password123',
+) => {
+  const { app } = await setupTestDatabase();
+  const loginResponse = await request(app.getHttpServer())
+    .post('/auth/login')
+    .send({
+      email,
+      password,
+    });
+
+  if (loginResponse.status !== 201) {
+    throw new Error(`Failed to login: ${loginResponse.status}`);
+  }
+
+  return loginResponse.body.access_token;
 };
