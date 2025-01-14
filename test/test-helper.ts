@@ -19,7 +19,10 @@ let testModule: TestingModule;
 let testApp: INestApplication;
 
 export const setupTestDatabase = async () => {
-  if (!testDataSource || !testDataSource.isInitialized) {
+  try {
+    // Clean up any existing instances first
+    await cleanupTestDatabase();
+
     testDataSource = new DataSource({
       type: 'postgres',
       host: process.env.POSTGRES_HOST,
@@ -33,9 +36,7 @@ export const setupTestDatabase = async () => {
     });
 
     await testDataSource.initialize();
-  }
 
-  if (!testModule) {
     testModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
@@ -45,17 +46,19 @@ export const setupTestDatabase = async () => {
         AppModule,
       ],
     }).compile();
-  }
 
-  if (!testApp) {
     testApp = testModule.createNestApplication({
       cors: true,
       logger: console,
     });
     await testApp.init();
-  }
 
-  return { app: testApp, module: testModule };
+    return { app: testApp, module: testModule };
+  } catch (error) {
+    console.error('Error during test database setup:', error);
+    await cleanupTestDatabase();
+    throw error;
+  }
 };
 
 export const cleanupTestDatabase = async () => {
@@ -362,7 +365,11 @@ export const getAuthToken = async (
   email: string,
   password: string = 'password123',
 ) => {
-  const { app } = await setupTestDatabase();
+  const app = getTestApp();
+  if (!app) {
+    throw new Error('Test app not initialized');
+  }
+
   const loginResponse = await request(app.getHttpServer())
     .post('/auth/login')
     .send({
