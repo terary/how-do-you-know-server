@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { TUserRole } from './types';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -20,6 +21,15 @@ describe('UsersService', () => {
     remove: jest.fn(),
   };
 
+  // Mock config service
+  const mockConfigService = {
+    get: jest.fn((key: string) => {
+      // Add any config values your service needs
+      if (key === 'JWT_SECRET') return 'test-secret';
+      return null;
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -27,6 +37,10 @@ describe('UsersService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: mockUserRepository,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();
