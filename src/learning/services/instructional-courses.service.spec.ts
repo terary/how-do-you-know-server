@@ -75,6 +75,18 @@ describe('InstructionalCoursesService', () => {
             delete: jest.fn().mockResolvedValue({ affected: 1 }),
           },
         },
+        {
+          provide: getRepositoryToken(LearningInstitution),
+          useValue: {
+            findOne: jest.fn().mockResolvedValue(mockInstitution),
+          },
+        },
+        {
+          provide: getRepositoryToken(User),
+          useValue: {
+            findOne: jest.fn().mockResolvedValue(mockInstructor),
+          },
+        },
       ],
     }).compile();
 
@@ -108,7 +120,11 @@ describe('InstructionalCoursesService', () => {
 
       const result = await service.create(createDto);
 
-      expect(repository.create).toHaveBeenCalledWith(createDto);
+      expect(repository.create).toHaveBeenCalledWith({
+        ...createDto,
+        institution: mockInstitution,
+        instructor: mockInstructor,
+      });
       expect(repository.save).toHaveBeenCalled();
       expect(result).toEqual(mockCourse);
     });
