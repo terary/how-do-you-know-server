@@ -1,0 +1,606 @@
+[1mdiff --git a/package-lock.json b/package-lock.json[m
+[1mindex b4ec446..6c9708d 100644[m
+[1m--- a/package-lock.json[m
+[1m+++ b/package-lock.json[m
+[36m@@ -14,11 +14,15 @@[m
+         "@nestjs/core": "^10.0.0",[m
+         "@nestjs/jwt": "^10.2.0",[m
+         "@nestjs/mapped-types": "*",[m
+[32m+[m[32m        "@nestjs/passport": "^10.0.3",[m
+         "@nestjs/platform-express": "^10.0.0",[m
+         "@nestjs/swagger": "^8.1.0",[m
+         "@nestjs/typeorm": "^10.0.2",[m
+[32m+[m[32m        "@types/passport-jwt": "^4.0.1",[m
+         "class-transformer": "^0.5.1",[m
+         "class-validator": "^0.14.1",[m
+[32m+[m[32m        "passport": "^0.7.0",[m
+[32m+[m[32m        "passport-jwt": "^4.0.1",[m
+         "pg": "^8.13.1",[m
+         "reflect-metadata": "^0.2.0",[m
+         "res": "^0.4.0",[m
+[36m@@ -1636,6 +1640,15 @@[m
+         }[m
+       }[m
+     },[m
+[32m+[m[32m    "node_modules/@nestjs/passport": {[m
+[32m+[m[32m      "version": "10.0.3",[m
+[32m+[m[32m      "resolved": "https://registry.npmjs.org/@nestjs/passport/-/passport-10.0.3.tgz",[m
+[32m+[m[32m      "integrity": "sha512-znJ9Y4S8ZDVY+j4doWAJ8EuuVO7SkQN3yOBmzxbGaXbvcSwFDAdGJ+OMCg52NdzIO4tQoN4pYKx8W6M0ArfFRQ==",[m
+[32m+[m[32m      "peerDependencies": {[m
+[32m+[m[32m        "@nestjs/common": "^8.0.0 || ^9.0.0 || ^10.0.0",[m
+[32m+[m[32m        "passport": "^0.4.0 || ^0.5.0 || ^0.6.0 || ^0.7.0"[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+     "node_modules/@nestjs/platform-express": {[m
+       "version": "10.4.15",[m
+       "resolved": "https://registry.npmjs.org/@nestjs/platform-express/-/platform-express-10.4.15.tgz",[m
+[36m@@ -1951,7 +1964,6 @@[m
+       "version": "1.19.5",[m
+       "resolved": "https://registry.npmjs.org/@types/body-parser/-/body-parser-1.19.5.tgz",[m
+       "integrity": "sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==",[m
+[31m-      "dev": true,[m
+       "dependencies": {[m
+         "@types/connect": "*",[m
+         "@types/node": "*"[m
+[36m@@ -1961,7 +1973,6 @@[m
+       "version": "3.4.38",[m
+       "resolved": "https://registry.npmjs.org/@types/connect/-/connect-3.4.38.tgz",[m
+       "integrity": "sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==",[m
+[31m-      "dev": true,[m
+       "dependencies": {[m
+         "@types/node": "*"[m
+       }[m
+[36m@@ -2002,7 +2013,6 @@[m
+       "version": "5.0.0",[m
+       "resolved": "https://registry.npmjs.org/@types/express/-/express-5.0.0.tgz",[m
+       "integrity": "sha512-DvZriSMehGHL1ZNLzi6MidnsDhUZM/x2pRdDIKdwbUNqqwHxMlRdkxtn6/EPKyqKpHqTl/4nRZsRNLpZxZRpPQ==",[m
+[31m-      "dev": true,[m
+       "dependencies": {[m
+         "@types/body-parser": "*",[m
+         "@types/express-serve-static-core": "^5.0.0",[m
+[36m@@ -2014,7 +2024,6 @@[m
+       "version": "5.0.2",[m
+       "resolved": "https://registry.npmjs.org/@types/express-serve-static-core/-/express-serve-static-core-5.0.2.tgz",[m
+       "integrity": "sha512-vluaspfvWEtE4vcSDlKRNer52DvOGrB2xv6diXy6UKyKW0lqZiWHGNApSyxOv+8DE5Z27IzVvE7hNkxg7EXIcg==",[m
+[31m-      "dev": true,[m
+       "dependencies": {[m
+         "@types/node": "*",[m
+         "@types/qs": "*",[m
+[36m@@ -2034,8 +2043,7 @@[m
+     "node_modules/@types/http-errors": {[m
+       "version": "2.0.4",[m
+       "resolved": "https://registry.npmjs.org/@types/http-errors/-/http-errors-2.0.4.tgz",[m
+[31m-      "integrity": "sha512-D0CFMMtydbJAegzOyHjtiKPLlvnm3iTZyZRSZoLq2mRhDdmLfIWOCYPfQJ4cu2erKghU++QvjcUjp/5h7hESpA==",[m
+[31m-      "dev": true[m
+[32m+[m[32m      "integrity": "sha512-D0CFMMtydbJAegzOyHjtiKPLlvnm3iTZyZRSZoLq2mRhDdmLfIWOCYPfQJ4cu2erKghU++QvjcUjp/5h7hESpA=="[m
+     },[m
+     "node_modules/@types/istanbul-lib-coverage": {[m
+       "version": "2.0.6",[m
+[36m@@ -2094,8 +2102,7 @@[m
+     "node_modules/@types/mime": {[m
+       "version": "1.3.5",[m
+       "resolved": "https://registry.npmjs.org/@types/mime/-/mime-1.3.5.tgz",[m
+[31m-      "integrity": "sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w==",[m
+[31m-      "dev": true[m
+[32m+[m[32m      "integrity": "sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w=="[m
+     },[m
+     "node_modules/@types/node": {[m
+       "version": "20.17.9",[m
+[36m@@ -2105,23 +2112,46 @@[m
+         "undici-types": "~6.19.2"[m
+       }[m
+     },[m
+[32m+[m[32m    "node_modules/@types/passport": {[m
+[32m+[m[32m      "version": "1.0.17",[m
+[32m+[m[32m      "resolved": "https://registry.npmjs.org/@types/passport/-/passport-1.0.17.tgz",[m
+[32m+[m[32m      "integrity": "sha512-aciLyx+wDwT2t2/kJGJR2AEeBz0nJU4WuRX04Wu9Dqc5lSUtwu0WERPHYsLhF9PtseiAMPBGNUOtFjxZ56prsg==",[m
+[32m+[m[32m      "dependencies": {[m
+[32m+[m[32m        "@types/express": "*"[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "node_modules/@types/passport-jwt": {[m
+[32m+[m[32m      "version": "4.0.1",[m
+[32m+[m[32m      "resolved": "https://registry.npmjs.org/@types/passport-jwt/-/passport-jwt-4.0.1.tgz",[m
+[32m+[m[32m      "integrity": "sha512-Y0Ykz6nWP4jpxgEUYq8NoVZeCQPo1ZndJLfapI249g1jHChvRfZRO/LS3tqu26YgAS/laI1qx98sYGz0IalRXQ==",[m
+[32m+[m[32m      "dependencies": {[m
+[32m+[m[32m        "@types/jsonwebtoken": "*",[m
+[32m+[m[32m        "@types/passport-strategy": "*"[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "node_modules/@types/passport-strategy": {[m
+[32m+[m[32m      "version": "0.2.38",[m
+[32m+[m[32m      "resolved": "https://registry.npmjs.org/@types/passport-strategy/-/passport-strategy-0.2.38.tgz",[m
+[32m+[m[32m      "integrity": "sha512-GC6eMqqojOooq993Tmnmp7AUTbbQSgilyvpCYQjT+H6JfG/g6RGc7nXEniZlp0zyKJ0WUdOiZWLBZft9Yug1uA==",[m
+[32m+[m[32m      "dependencies": {[m
+[32m+[m[32m        "@types/express": "*",[m
+[32m+[m[32m        "@types/passport": "*"[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+     "node_modules/@types/qs": {[m
+       "version": "6.9.17",[m
+       "resolved": "https://registry.npmjs.org/@types/qs/-/qs-6.9.17.tgz",[m
+[31m-      "integrity": "sha512-rX4/bPcfmvxHDv0XjfJELTTr+iB+tn032nPILqHm5wbthUUUuVtNGGqzhya9XUxjTP8Fpr0qYgSZZKxGY++svQ==",[m
+[31m-      "dev": true[m
+[32m+[m[32m      "integrity": "sha512-rX4/bPcfmvxHDv0XjfJELTTr+iB+tn032nPILqHm5wbthUUUuVtNGGqzhya9XUxjTP8Fpr0qYgSZZKxGY++svQ=="[m
+     },[m
+     "node_modules/@types/range-parser": {[m
+       "version": "1.2.7",[m
+       "resolved": "https://registry.npmjs.org/@types/range-parser/-/range-parser-1.2.7.tgz",[m
+[31m-      "integrity": "sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==",[m
+[31m-      "dev": true[m
+[32m+[m[32m      "integrity": "sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ=="[m
+     },[m
+     "node_modules/@types/send": {[m
+       "version": "0.17.4",[m
+       "resolved": "https://registry.npmjs.org/@types/send/-/send-0.17.4.tgz",[m
+       "integrity": "sha512-x2EM6TJOybec7c52BX0ZspPodMsQUd5L6PRwOunVyVUhXiBSKf3AezDL8Dgvgt5o0UfKNfuA0eMLr2wLT4AiBA==",[m
+[31m-      "dev": true,[m
+       "dependencies": {[m
+         "@types/mime": "^1",[m
+         "@types/node": "*"[m
+[36m@@ -2131,7 +2161,6 @@[m
+       "version": "1.15.7",[m
+       "resolved": "https://registry.npmjs.org/@types/serve-static/-/serve-static-1.15.7.tgz",[m
+       "integrity": "sha512-W8Ym+h8nhuRwaKPaDw34QUkwsGi6Rc4yYqvKFo5rm2FUEhCFbzVWrxXUxuKK8TASjWsysJY0nsmNCGhCOIsrOw==",[m
+[31m-      "dev": true,[m
+       "dependencies": {[m
+         "@types/http-errors": "*",[m
+         "@types/node": "*",[m
+[36m@@ -6860,6 +6889,40 @@[m
+         "node": ">= 0.8"[m
+       }[m
+     },[m
+[32m+[m[32m    "node_modules/passport": {[m
+[32m+[m[32m      "version": "0.7.0",[m
+[32m+[m[32m      "resolved": "https://registry.npmjs.org/passport/-/passport-0.7.0.tgz",[m
+[32m+[m[32m      "integrity": "sha512-cPLl+qZpSc+ireUvt+IzqbED1cHHkDoVYMo30jbJIdOOjQ1MQYZBPiNvmi8UM6lJuOpTPXJGZQk0DtC4y61MYQ==",[m
+[32m+[m[32m      "dependencies": {[m
+[32m+[m[32m        "passport-strategy": "1.x.x",[m
+[32m+[m[32m        "pause": "0.0.1",[m
+[32m+[m[32m        "utils-merge": "^1.0.1"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "engines": {[m
+[32m+[m[32m        "node": ">= 0.4.0"[m
+[32m+[m[32m      },[m
+[32m+[m[32m      "funding": {[m
+[32m+[m[32m        "type": "github",[m
+[32m+[m[32m        "url": "https://github.com/sponsors/jaredhanson"[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "node_modules/passport-jwt": {[m
+[32m+[m[32m      "version": "4.0.1",[m
+[32m+[m[32m      "resolved": "https://registry.npmjs.org/passport-jwt/-/passport-jwt-4.0.1.tgz",[m
+[32m+[m[32m      "integrity": "sha512-UCKMDYhNuGOBE9/9Ycuoyh7vP6jpeTp/+sfMJl7nLff/t6dps+iaeE0hhNkKN8/HZHcJ7lCdOyDxHdDoxoSvdQ==",[m
+[32m+[m[32m      "dependencies": {[m
+[32m+[m[32m        "jsonwebtoken": "^9.0.0",[m
+[32m+[m[32m        "passport-strategy": "^1.0.0"[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+[32m+[m[32m    "node_modules/passport-strategy": {[m
+[32m+[m[32m      "version": "1.0.0",[m
+[32m+[m[32m      "resolved": "https://registry.npmjs.org/passport-strategy/-/passport-strategy-1.0.0.tgz",[m
+[32m+[m[32m      "integrity": "sha512-CB97UUvDKJde2V0KDWWB3lyf6PC3FaZP7YxZ2G8OAtn9p4HI9j9JLP9qjOGZFvyl8uwNT8qM+hGnz/n16NI7oA==",[m
+[32m+[m[32m      "engines": {[m
+[32m+[m[32m        "node": ">= 0.4.0"[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+     "node_modules/path-exists": {[m
+       "version": "4.0.0",[m
+       "resolved": "https://registry.npmjs.org/path-exists/-/path-exists-4.0.0.tgz",[m
+[36m@@ -6926,6 +6989,11 @@[m
+         "node": ">=8"[m
+       }[m
+     },[m
+[32m+[m[32m    "node_modules/pause": {[m
+[32m+[m[32m      "version": "0.0.1",[m
+[32m+[m[32m      "resolved": "https://registry.npmjs.org/pause/-/pause-0.0.1.tgz",[m
+[32m+[m[32m      "integrity": "sha512-KG8UEiEVkR3wGEb4m5yZkVCzigAD+cVEJck2CzYZO37ZGJfctvVptVO192MwrtPhzONn6go8ylnOdMhKqi4nfg=="[m
+[32m+[m[32m    },[m
+     "node_modules/pg": {[m
+       "version": "8.13.1",[m
+       "resolved": "https://registry.npmjs.org/pg/-/pg-8.13.1.tgz",[m
+[1mdiff --git a/package.json b/package.json[m
+[1mindex ba0c22e..6942ebc 100644[m
+[1m--- a/package.json[m
+[1m+++ b/package.json[m
+[36m@@ -28,11 +28,15 @@[m
+     "@nestjs/core": "^10.0.0",[m
+     "@nestjs/jwt": "^10.2.0",[m
+     "@nestjs/mapped-types": "*",[m
+[32m+[m[32m    "@nestjs/passport": "^10.0.3",[m
+     "@nestjs/platform-express": "^10.0.0",[m
+     "@nestjs/swagger": "^8.1.0",[m
+     "@nestjs/typeorm": "^10.0.2",[m
+[32m+[m[32m    "@types/passport-jwt": "^4.0.1",[m
+     "class-transformer": "^0.5.1",[m
+     "class-validator": "^0.14.1",[m
+[32m+[m[32m    "passport": "^0.7.0",[m
+[32m+[m[32m    "passport-jwt": "^4.0.1",[m
+     "pg": "^8.13.1",[m
+     "reflect-metadata": "^0.2.0",[m
+     "res": "^0.4.0",[m
+[1mdiff --git a/src/auth/auth.module.ts b/src/auth/auth.module.ts[m
+[1mindex 6e9ca9a..f5419c8 100644[m
+[1m--- a/src/auth/auth.module.ts[m
+[1m+++ b/src/auth/auth.module.ts[m
+[36m@@ -1,21 +1,23 @@[m
+ import { Module } from '@nestjs/common';[m
+ import { AuthService } from './auth.service';[m
+[32m+[m[32mimport { AuthController } from './auth.controller';[m
+ import { UsersModule } from '../users/users.module';[m
+[32m+[m[32mimport { PassportModule } from '@nestjs/passport';[m
+ import { JwtModule } from '@nestjs/jwt';[m
+[31m-import { AuthController } from './auth.controller';[m
+ import { jwtConstants } from './constants';[m
+[32m+[m[32mimport { JwtStrategy } from './strategies/jwt.strategy';[m
+ [m
+ @Module({[m
+   imports: [[m
+     UsersModule,[m
+[32m+[m[32m    PassportModule,[m
+     JwtModule.register({[m
+[31m-      global: true,[m
+       secret: jwtConstants.secret,[m
+[31m-      signOptions: { expiresIn: '600s' }, // *tmc* 10 minutes to time out... Is that a good idea?[m
+[32m+[m[32m      signOptions: { expiresIn: '60m' },[m
+     }),[m
+   ],[m
+[31m-  providers: [AuthService],[m
+   controllers: [AuthController],[m
+[31m-  exports: [AuthService],[m
+[32m+[m[32m  providers: [AuthService, JwtStrategy],[m
+[32m+[m[32m  exports: [AuthService, JwtModule],[m
+ })[m
+ export class AuthModule {}[m
+[1mdiff --git a/src/dev-debug/dev-debug.module.ts b/src/dev-debug/dev-debug.module.ts[m
+[1mindex 603dd88..629cd03 100644[m
+[1m--- a/src/dev-debug/dev-debug.module.ts[m
+[1m+++ b/src/dev-debug/dev-debug.module.ts[m
+[36m@@ -1,11 +1,12 @@[m
+ import { Module } from '@nestjs/common';[m
+ import { DevDebugService } from './dev-debug.service';[m
+ import { DevDebugController } from './dev-debug.controller';[m
+[32m+[m[32mimport { AuthModule } from '../auth/auth.module';[m
+ import { TypeOrmModule } from '@nestjs/typeorm';[m
+ import { User } from '../users/entities/user.entity';[m
+ [m
+ @Module({[m
+[31m-  imports: [TypeOrmModule.forFeature([User])],[m
+[32m+[m[32m  imports: [AuthModule, TypeOrmModule.forFeature([User])],[m
+   controllers: [DevDebugController],[m
+   providers: [DevDebugService],[m
+ })[m
+[1mdiff --git a/src/questions/questions.controller.ts b/src/questions/questions.controller.ts[m
+[1mindex 081be90..a756901 100644[m
+[1m--- a/src/questions/questions.controller.ts[m
+[1m+++ b/src/questions/questions.controller.ts[m
+[36m@@ -1,34 +1,80 @@[m
+[31m-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';[m
+[32m+[m[32mimport {[m
+[32m+[m[32m  Controller,[m
+[32m+[m[32m  Get,[m
+[32m+[m[32m  Post,[m
+[32m+[m[32m  Body,[m
+[32m+[m[32m  Param,[m
+[32m+[m[32m  UseGuards,[m
+[32m+[m[32m  Request,[m
+[32m+[m[32m} from '@nestjs/common';[m
+[32m+[m[32mimport { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';[m
+ import { QuestionsService } from './questions.service';[m
+[31m-import { CreateQuestionDto } from './dto/create-question.dto';[m
+[31m-import { UpdateQuestionDto } from './dto/update-question.dto';[m
+[32m+[m[32mimport { QuestionTemplate, QuestionActual } from './entities';[m
+[32m+[m[32mimport { TUserPromptType, TUserResponseType } from './types';[m
+ [m
+ @Controller('questions')[m
+[32m+[m[32m@UseGuards(JwtAuthGuard)[m
+ export class QuestionsController {[m
+   constructor(private readonly questionsService: QuestionsService) {}[m
+ [m
+[31m-  @Post()[m
+[31m-  create(@Body() createQuestionDto: CreateQuestionDto) {[m
+[31m-    return this.questionsService.create(createQuestionDto);[m
+[32m+[m[32m  @Get('templates')[m
+[32m+[m[32m  findAllTemplates(): Promise<QuestionTemplate[]> {[m
+[32m+[m[32m    return this.questionsService.findAllTemplates();[m
+   }[m
+ [m
+[31m-  @Get()[m
+[31m-  findAll() {[m
+[31m-    return this.questionsService.findAll();[m
+[32m+[m[32m  @Get('templates/:id')[m
+[32m+[m[32m  findTemplateById(@Param('id') id: string): Promise<QuestionTemplate> {[m
+[32m+[m[32m    return this.questionsService.findTemplateById(id);[m
+   }[m
+ [m
+[31m-  @Get(':id')[m
+[31m-  findOne(@Param('id') id: string) {[m
+[31m-    return this.questionsService.findOne(+id);[m
+[32m+[m[32m  @Post('templates')[m
+[32m+[m[32m  createTemplate([m
+[32m+[m[32m    @Body()[m
+[32m+[m[32m    data: {[m
+[32m+[m[32m      userPromptType: TUserPromptType;[m
+[32m+[m[32m      userResponseType: TUserResponseType;[m
+[32m+[m[32m      exclusivityType: 'exam-only' | 'practice-only' | 'exam-practice-both';[m
+[32m+[m[32m      userPromptText?: string;[m
+[32m+[m[32m      instructionText?: string;[m
+[32m+[m[32m      media?: {[m
+[32m+[m[32m        mediaContentType: 'audio/mpeg' | 'video/mp4';[m
+[32m+[m[32m        height: number;[m
+[32m+[m[32m        width: number;[m
+[32m+[m[32m        url: string;[m
+[32m+[m[32m        specialInstructionText?: string;[m
+[32m+[m[32m        duration?: number;[m
+[32m+[m[32m        fileSize?: number;[m
+[32m+[m[32m        thumbnailUrl?: string;[m
+[32m+[m[32m      }[];[m
+[32m+[m[32m      validAnswers: {[m
+[32m+[m[32m        text?: string;[m
+[32m+[m[32m        booleanValue?: boolean;[m
+[32m+[m[32m        fodderPoolId?: string;[m
+[32m+[m[32m      }[];[m
+[32m+[m[32m    },[m
+[32m+[m[32m    @Request() req,[m
+[32m+[m[32m  ): Promise<QuestionTemplate> {[m
+[32m+[m[32m    return this.questionsService.createTemplate(data, req.user.id);[m
+   }[m
+ [m
+[31m-  @Patch(':id')[m
+[31m-  update(@Param('id') id: string, @Body() updateQuestionDto: UpdateQuestionDto) {[m
+[31m-    return this.questionsService.update(+id, updateQuestionDto);[m
+[32m+[m[32m  @Post('templates/:id/generate')[m
+[32m+[m[32m  generateActual([m
+[32m+[m[32m    @Param('id') id: string,[m
+[32m+[m[32m    @Body()[m
+[32m+[m[32m    data: {[m
+[32m+[m[32m      examType: 'practice' | 'live';[m
+[32m+[m[32m      sectionPosition: number;[m
+[32m+[m[32m    },[m
+[32m+[m[32m  ): Promise<QuestionActual> {[m
+[32m+[m[32m    return this.questionsService.generateActual([m
+[32m+[m[32m      id,[m
+[32m+[m[32m      data.examType,[m
+[32m+[m[32m      data.sectionPosition,[m
+[32m+[m[32m    );[m
+   }[m
+ [m
+[31m-  @Delete(':id')[m
+[31m-  remove(@Param('id') id: string) {[m
+[31m-    return this.questionsService.remove(+id);[m
+[32m+[m[32m  @Get('actuals/:id')[m
+[32m+[m[32m  findActualById(@Param('id') id: string): Promise<QuestionActual> {[m
+[32m+[m[32m    return this.questionsService.findActualById(id);[m
+   }[m
+ }[m
+[1mdiff --git a/src/questions/questions.module.ts b/src/questions/questions.module.ts[m
+[1mindex 695fde4..17615c3 100644[m
+[1m--- a/src/questions/questions.module.ts[m
+[1m+++ b/src/questions/questions.module.ts[m
+[36m@@ -1,9 +1,37 @@[m
+ import { Module } from '@nestjs/common';[m
+[32m+[m[32mimport { TypeOrmModule } from '@nestjs/typeorm';[m
+[32m+[m[32mimport { AuthModule } from '../auth/auth.module';[m
+[32m+[m[32mimport {[m
+[32m+[m[32m  FodderPool,[m
+[32m+[m[32m  FodderItem,[m
+[32m+[m[32m  QuestionTemplate,[m
+[32m+[m[32m  QuestionTemplateMedia,[m
+[32m+[m[32m  QuestionTemplateValidAnswer,[m
+[32m+[m[32m  QuestionActual,[m
+[32m+[m[32m  QuestionActualChoice,[m
+[32m+[m[32m  QuestionActualValidAnswer,[m
+[32m+[m[32m} from './entities';[m
+ import { QuestionsService } from './questions.service';[m
+ import { QuestionsController } from './questions.controller';[m
+[32m+[m[32mimport { FodderPoolsService } from './fodder-pools.service';[m
+[32m+[m[32mimport { FodderPoolsController } from './fodder-pools.controller';[m
+ [m
+ @Module({[m
+[31m-  controllers: [QuestionsController],[m
+[31m-  providers: [QuestionsService],[m
+[32m+[m[32m  imports: [[m
+[32m+[m[32m    AuthModule,[m
+[32m+[m[32m    TypeOrmModule.forFeature([[m
+[32m+[m[32m      FodderPool,[m
+[32m+[m[32m      FodderItem,[m
+[32m+[m[32m      QuestionTemplate,[m
+[32m+[m[32m      QuestionTemplateMedia,[m
+[32m+[m[32m      QuestionTemplateValidAnswer,[m
+[32m+[m[32m      QuestionActual,[m
+[32m+[m[32m      QuestionActualChoice,[m
+[32m+[m[32m      QuestionActualValidAnswer,[m
+[32m+[m[32m    ]),[m
+[32m+[m[32m  ],[m
+[32m+[m[32m  providers: [QuestionsService, FodderPoolsService],[m
+[32m+[m[32m  controllers: [QuestionsController, FodderPoolsController],[m
+[32m+[m[32m  exports: [QuestionsService, FodderPoolsService],[m
+ })[m
+ export class QuestionsModule {}[m
+[1mdiff --git a/src/questions/questions.service.ts b/src/questions/questions.service.ts[m
+[1mindex d15a6d4..05822af 100644[m
+[1m--- a/src/questions/questions.service.ts[m
+[1m+++ b/src/questions/questions.service.ts[m
+[36m@@ -1,26 +1,170 @@[m
+ import { Injectable } from '@nestjs/common';[m
+[31m-import { CreateQuestionDto } from './dto/create-question.dto';[m
+[31m-import { UpdateQuestionDto } from './dto/update-question.dto';[m
+[32m+[m[32mimport { InjectRepository } from '@nestjs/typeorm';[m
+[32m+[m[32mimport { Repository } from 'typeorm';[m
+[32m+[m[32mimport {[m
+[32m+[m[32m  QuestionTemplate,[m
+[32m+[m[32m  QuestionTemplateMedia,[m
+[32m+[m[32m  QuestionTemplateValidAnswer,[m
+[32m+[m[32m  QuestionActual,[m
+[32m+[m[32m  QuestionActualChoice,[m
+[32m+[m[32m  QuestionActualValidAnswer,[m
+[32m+[m[32m} from './entities';[m
+[32m+[m[32mimport { TUserPromptType, TUserResponseType } from './types';[m
+ [m
+ @Injectable()[m
+ export class QuestionsService {[m
+[31m-  create(createQuestionDto: CreateQuestionDto) {[m
+[31m-    return 'This action adds a new question';[m
+[32m+[m[32m  constructor([m
+[32m+[m[32m    @InjectRepository(QuestionTemplate)[m
+[32m+[m[32m    private readonly templateRepository: Repository<QuestionTemplate>,[m
+[32m+[m[32m    @InjectRepository(QuestionTemplateMedia)[m
+[32m+[m[32m    private readonly templateMediaRepository: Repository<QuestionTemplateMedia>,[m
+[32m+[m[32m    @InjectRepository(QuestionTemplateValidAnswer)[m
+[32m+[m[32m    private readonly templateAnswerRepository: Repository<QuestionTemplateValidAnswer>,[m
+[32m+[m[32m    @InjectRepository(QuestionActual)[m
+[32m+[m[32m    private readonly actualRepository: Repository<QuestionActual>,[m
+[32m+[m[32m    @InjectRepository(QuestionActualChoice)[m
+[32m+[m[32m    private readonly actualChoiceRepository: Repository<QuestionActualChoice>,[m
+[32m+[m[32m    @InjectRepository(QuestionActualValidAnswer)[m
+[32m+[m[32m    private readonly actualAnswerRepository: Repository<QuestionActualValidAnswer>,[m
+[32m+[m[32m  ) {}[m
+[32m+[m
+[32m+[m[32m  async findAllTemplates(): Promise<QuestionTemplate[]> {[m
+[32m+[m[32m    return this.templateRepository.find({[m
+[32m+[m[32m      relations: ['media', 'validAnswers'],[m
+[32m+[m[32m    });[m
+   }[m
+ [m
+[31m-  findAll() {[m
+[31m-    return `This action returns all questions`;[m
+[32m+[m[32m  async findTemplateById(id: string): Promise<QuestionTemplate> {[m
+[32m+[m[32m    return this.templateRepository.findOne({[m
+[32m+[m[32m      where: { id },[m
+[32m+[m[32m      relations: ['media', 'validAnswers'],[m
+[32m+[m[32m    });[m
+   }[m
+ [m
+[31m-  findOne(id: number) {[m
+[31m-    return `This action returns a #${id} question`;[m
+[32m+[m[32m  async createTemplate([m
+[32m+[m[32m    data: {[m
+[32m+[m[32m      userPromptType: TUserPromptType;[m
+[32m+[m[32m      userResponseType: TUserResponseType;[m
+[32m+[m[32m      exclusivityType: 'exam-only' | 'practice-only' | 'exam-practice-both';[m
+[32m+[m[32m      userPromptText?: string;[m
+[32m+[m[32m      instructionText?: string;[m
+[32m+[m[32m      media?: {[m
+[32m+[m[32m        mediaContentType: 'audio/mpeg' | 'video/mp4';[m
+[32m+[m[32m        height: number;[m
+[32m+[m[32m        width: number;[m
+[32m+[m[32m        url: string;[m
+[32m+[m[32m        specialInstructionText?: string;[m
+[32m+[m[32m        duration?: number;[m
+[32m+[m[32m        fileSize?: number;[m
+[32m+[m[32m        thumbnailUrl?: string;[m
+[32m+[m[32m      }[];[m
+[32m+[m[32m      validAnswers: {[m
+[32m+[m[32m        text?: string;[m
+[32m+[m[32m        booleanValue?: boolean;[m
+[32m+[m[32m        fodderPoolId?: string;[m
+[32m+[m[32m      }[];[m
+[32m+[m[32m    },[m
+[32m+[m[32m    userId: string,[m
+[32m+[m[32m  ): Promise<QuestionTemplate> {[m
+[32m+[m[32m    const template = this.templateRepository.create({[m
+[32m+[m[32m      userPromptType: data.userPromptType,[m
+[32m+[m[32m      userResponseType: data.userResponseType,[m
+[32m+[m[32m      exclusivityType: data.exclusivityType,[m
+[32m+[m[32m      userPromptText: data.userPromptText,[m
+[32m+[m[32m      instructionText: data.instructionText,[m
+[32m+[m[32m      created_by: userId,[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m    const savedTemplate = await this.templateRepository.save(template);[m
+[32m+[m
+[32m+[m[32m    if (data.media?.length) {[m
+[32m+[m[32m      const mediaEntities = data.media.map((m) =>[m
+[32m+[m[32m        this.templateMediaRepository.create({[m
+[32m+[m[32m          template_id: savedTemplate.id,[m
+[32m+[m[32m          ...m,[m
+[32m+[m[32m        }),[m
+[32m+[m[32m      );[m
+[32m+[m[32m      await this.templateMediaRepository.save(mediaEntities);[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    if (data.validAnswers?.length) {[m
+[32m+[m[32m      const answerEntities = data.validAnswers.map((a) =>[m
+[32m+[m[32m        this.templateAnswerRepository.create({[m
+[32m+[m[32m          template_id: savedTemplate.id,[m
+[32m+[m[32m          ...a,[m
+[32m+[m[32m        }),[m
+[32m+[m[32m      );[m
+[32m+[m[32m      await this.templateAnswerRepository.save(answerEntities);[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    return this.findTemplateById(savedTemplate.id);[m
+   }[m
+ [m
+[31m-  update(id: number, updateQuestionDto: UpdateQuestionDto) {[m
+[31m-    return `This action updates a #${id} question`;[m
+[32m+[m[32m  async generateActual([m
+[32m+[m[32m    templateId: string,[m
+[32m+[m[32m    examType: 'practice' | 'live',[m
+[32m+[m[32m    sectionPosition: number,[m
+[32m+[m[32m  ): Promise<QuestionActual> {[m
+[32m+[m[32m    const template = await this.findTemplateById(templateId);[m
+[32m+[m[32m    if (!template) {[m
+[32m+[m[32m      throw new Error('Template not found');[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // Create the actual question[m
+[32m+[m[32m    const actual = this.actualRepository.create({[m
+[32m+[m[32m      template_id: template.id,[m
+[32m+[m[32m      examType,[m
+[32m+[m[32m      sectionPosition,[m
+[32m+[m[32m      userPromptText: template.userPromptText,[m
+[32m+[m[32m      instructionText: template.instructionText,[m
+[32m+[m[32m    });[m
+[32m+[m
+[32m+[m[32m    const savedActual = await this.actualRepository.save(actual);[m
+[32m+[m
+[32m+[m[32m    // Handle multiple choice questions[m
+[32m+[m[32m    if (template.userResponseType === 'multiple-choice-4') {[m
+[32m+[m[32m      const validAnswer = template.validAnswers[0];[m
+[32m+[m[32m      if (!validAnswer) {[m
+[32m+[m[32m        throw new Error('Valid answer not found for multiple choice question');[m
+[32m+[m[32m      }[m
+[32m+[m
+[32m+[m[32m      // TODO: Implement fodder pool selection logic[m
+[32m+[m[32m      // For now, just use the correct answer and some dummy options[m
+[32m+[m[32m      const choices = [[m
+[32m+[m[32m        { text: validAnswer.text, isCorrect: true, position: 0 },[m
+[32m+[m[32m        { text: 'Dummy Option 1', isCorrect: false, position: 1 },[m
+[32m+[m[32m        { text: 'Dummy Option 2', isCorrect: false, position: 2 },[m
+[32m+[m[32m        { text: 'Dummy Option 3', isCorrect: false, position: 3 },[m
+[32m+[m[32m      ].map((c) =>[m
+[32m+[m[32m        this.actualChoiceRepository.create({[m
+[32m+[m[32m          question_actual_id: savedActual.id,[m
+[32m+[m[32m          ...c,[m
+[32m+[m[32m        }),[m
+[32m+[m[32m      );[m
+[32m+[m
+[32m+[m[32m      await this.actualChoiceRepository.save(choices);[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // Add valid answers for practice exams[m
+[32m+[m[32m    if (examType === 'practice') {[m
+[32m+[m[32m      const validAnswers = template.validAnswers.map((a) =>[m
+[32m+[m[32m        this.actualAnswerRepository.create({[m
+[32m+[m[32m          question_actual_id: savedActual.id,[m
+[32m+[m[32m          text: a.text,[m
+[32m+[m[32m          booleanValue: a.booleanValue,[m
+[32m+[m[32m        }),[m
+[32m+[m[32m      );[m
+[32m+[m
+[32m+[m[32m      await this.actualAnswerRepository.save(validAnswers);[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    return this.findActualById(savedActual.id);[m
+   }[m
+ [m
+[31m-  remove(id: number) {[m
+[31m-    return `This action removes a #${id} question`;[m
+[32m+[m[32m  async findActualById(id: string): Promise<QuestionActual> {[m
+[32m+[m[32m    return this.actualRepository.findOne({[m
+[32m+[m[32m      where: { id },[m
+[32m+[m[32m      relations: ['choices', 'validAnswers'],[m
+[32m+[m[32m    });[m
+   }[m
+ }[m

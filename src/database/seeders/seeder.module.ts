@@ -1,11 +1,26 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { User } from '../../users/entities/user.entity';
-import { Question } from '../../questions/entities/question.entity';
-import { UserSeeder } from './user.seeder';
-import { QuestionSeeder } from './question.seeder';
 import { SeederService } from './seeder.service';
+import { UserSeeder } from './user.seeder';
+import { QuestionTemplateSeeder } from './question-template.seeder';
+import { LearningInstitutionSeeder } from './learning-institution.seeder';
+import { InstructionalCourseSeeder } from './instructional-course.seeder';
+import { ExamTemplateSeeder } from './exam-template.seeder';
+import { User } from '../../users/entities/user.entity';
+import { QuestionTemplate } from '../../questions/entities/question-template.entity';
+import { QuestionTemplateMedia } from '../../questions/entities/question-template-media.entity';
+import { QuestionTemplateValidAnswer } from '../../questions/entities/question-template-valid-answer.entity';
+import { FodderPool } from '../../questions/entities/fodder-pool.entity';
+import { FodderItem } from '../../questions/entities/fodder-item.entity';
+import { QuestionActual } from '../../questions/entities/question-actual.entity';
+import { QuestionActualChoice } from '../../questions/entities/question-actual-choice.entity';
+import { QuestionActualValidAnswer } from '../../questions/entities/question-actual-valid-answer.entity';
+import { ExamTemplate } from '../../learning/entities/exam-template.entity';
+import { ExamTemplateSection } from '../../learning/entities/exam-template-section.entity';
+import { ExamTemplateSectionQuestion } from '../../learning/entities/exam-template-section-question.entity';
+import { LearningInstitution } from '../../learning/entities/learning-institution.entity';
+import { InstructionalCourse } from '../../learning/entities/instructional-course.entity';
 import { getDatabaseConfig } from '../../config/database.config';
 
 @Module({
@@ -19,33 +34,31 @@ import { getDatabaseConfig } from '../../config/database.config';
       useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User, Question]),
+    TypeOrmModule.forFeature([
+      User,
+      QuestionTemplate,
+      QuestionTemplateMedia,
+      QuestionTemplateValidAnswer,
+      FodderPool,
+      FodderItem,
+      QuestionActual,
+      QuestionActualChoice,
+      QuestionActualValidAnswer,
+      ExamTemplate,
+      ExamTemplateSection,
+      ExamTemplateSectionQuestion,
+      LearningInstitution,
+      InstructionalCourse,
+    ]),
   ],
-  providers: [UserSeeder, QuestionSeeder, SeederService],
+  providers: [
+    SeederService,
+    UserSeeder,
+    QuestionTemplateSeeder,
+    LearningInstitutionSeeder,
+    InstructionalCourseSeeder,
+    ExamTemplateSeeder,
+  ],
   exports: [SeederService],
 })
 export class SeederModule {}
-
-`
-    Everything looks good so far.
-
-    Need to consider question's complex typing.
-
-    A) Create a types directory in the dev-debug folder.
-    B) Ask Cursor for it's opinion on the question's complex typing.
-       Explain that we don't need entities for each sub types. (eg no UserResponseEntity)
-    
-    Then work with cursor to redefine the current question type 
-    
-    You're going to have to lay-out a minimum flow and consider extending, for exams, practice exams, etc.
-
-    An exam will have sections so there will need to be section id 
-    An exam will not send the correct answers
-    We may want a questionNotes feature to update practice questions with student notes
-    So the examiner will create a section? add questions?  Simply add questions as single process
-    that create exam, sections, add questions?.. Then when the student is assigned an exam 
-    they are given their own instance?  Or because practice exam question pool will contain
-    actual exam questions, when student is assigned exam they get one generated and remains 
-    on disk?? 
-
-`;

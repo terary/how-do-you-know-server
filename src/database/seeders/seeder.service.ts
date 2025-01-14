@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { UserSeeder } from './user.seeder';
-import { QuestionSeeder } from './question.seeder';
+import { QuestionTemplateSeeder } from './question-template.seeder';
+import { LearningInstitutionSeeder } from './learning-institution.seeder';
+import { InstructionalCourseSeeder } from './instructional-course.seeder';
+import { ExamTemplateSeeder } from './exam-template.seeder';
 
 @Injectable()
 export class SeederService {
@@ -8,24 +11,28 @@ export class SeederService {
 
   constructor(
     private readonly userSeeder: UserSeeder,
-    private readonly questionSeeder: QuestionSeeder,
+    private readonly questionTemplateSeeder: QuestionTemplateSeeder,
+    private readonly learningInstitutionSeeder: LearningInstitutionSeeder,
+    private readonly instructionalCourseSeeder: InstructionalCourseSeeder,
+    private readonly examTemplateSeeder: ExamTemplateSeeder,
   ) {}
 
   async seed() {
-    try {
-      this.logger.log('Starting database seeding...');
+    this.logger.log('Starting seeder...');
 
-      await this.userSeeder.seed();
-      this.logger.log('Users seeded successfully');
+    // Seed users first as they might be referenced by other entities
+    await this.userSeeder.seed();
 
-      await this.questionSeeder.seed();
-      this.logger.log('Questions seeded successfully');
+    // Seed learning institutions before courses
+    await this.learningInstitutionSeeder.seed();
 
-      this.logger.log('Database seeding completed successfully');
-    } catch (error) {
-      this.logger.error('Database seeding failed!');
-      this.logger.error(error);
-      throw error;
-    }
+    // Seed courses after institutions
+    await this.instructionalCourseSeeder.seed();
+
+    // Seed question templates before exam templates
+    await this.questionTemplateSeeder.seed();
+
+    // Finally, seed exam templates which depend on courses and questions
+    await this.examTemplateSeeder.seed();
   }
 }

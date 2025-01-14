@@ -1,81 +1,56 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ApiProperty } from '@nestjs/swagger';
-import { TAuthenticatedUser, TUserRole } from 'src/users/types';
-
-export class SignOutDto {
-  @ApiProperty({
-    description: 'JWT access token',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-  })
-  access_token: string;
-}
-
-export class SignInDto {
-  @ApiProperty({
-    description: 'Username for authentication',
-    example: 'john',
-  })
-  username: string;
-
-  @ApiProperty({
-    description: 'Password for authentication',
-    example: 'changeme',
-  })
-  password: string;
-}
+import { UsersService } from '../users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
 
-  async signIn({
-    username,
-    password,
-  }: SignInDto): Promise<{ access_token: string }> {
-    const user = await this.usersService.findOne(username);
-    if (user?.password !== password) {
-      throw new UnauthorizedException();
+  async validateUser(username: string, pass: string): Promise<any> {
+    this.logger.debug(`Attempting to validate user: ${username}`);
+    const user = await this.usersService.findByUsername(username);
+    if (!user) {
+      this.logger.debug('User not found');
+      throw new UnauthorizedException('User not found');
     }
-    const payload = { sub: user.username, username: user.username };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
+
+    this.logger.debug('User found, details:', {
+      username: user.username,
+      roles: user.roles,
+      passwordLength: user.password.length,
+      passwordStart: user.password.substring(0, 10),
+    });
+
+    this.logger.debug('Comparing passwords:', {
+      providedPassword: pass,
+      storedPasswordStart: user.password.substring(0, 10),
+    });
+
+    const isPasswordValid = await bcrypt.compare(pass, user.password);
+    this.logger.debug(`Password valid: ${isPasswordValid}`);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    const { password, ...result } = user;
+    return result;
+  }
+
+  async login(user: any) {
+    const payload = {
+      username: user.username,
+      sub: user.id,
+      roles: user.roles,
     };
-  }
-
-  async signOut({ access_token }: SignOutDto): Promise<boolean> {
-    return Promise.resolve(true);
-  }
-
-  async getProfile(username: string): Promise<TAuthenticatedUser> {
-    return this.usersService.findOne(username);
-  }
-
-  async updateUserProfile(username: string, updateUserDto: TUserRole) {
-    const propertyNames = [
-      // 'username',
-      'firstName',
-      'lastName',
-      'email',
-      // 'createdAt',
-      // 'updatedAt',
-      // 'roles',
-    ];
-    const user = await this.usersService.findOne(username);
-    const allowedUpdates = propertyNames.reduce((acc, property) => {
-      if (updateUserDto[property] !== undefined) {
-        acc[property] = updateUserDto[property];
-      }
-      return acc;
-    }, {});
-    const updatedUser = await this.usersService.updateUserProfile(
-      username,
-      allowedUpdates,
-    );
-    return updatedUser;
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }

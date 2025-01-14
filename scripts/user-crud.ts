@@ -1,4 +1,9 @@
 import axios from 'axios';
+import * as bcrypt from 'bcrypt';
+
+const randomInt = (min = 0, max = 1000) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 
 const API_URL = 'http://localhost:3001';
 
@@ -13,7 +18,17 @@ interface User {
 
 async function createUser(userData: User) {
   try {
-    const response = await axios.post(`${API_URL}/users`, userData);
+    // Hash the password before sending to server
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const userDataWithHashedPassword = {
+      ...userData,
+      password: hashedPassword,
+    };
+
+    const response = await axios.post(
+      `${API_URL}/users`,
+      userDataWithHashedPassword,
+    );
     console.log('User created:', response.data);
     return response.data;
   } catch (error) {
@@ -73,11 +88,12 @@ async function deleteUser(username: string) {
 async function main() {
   try {
     // Test user data
+    const randomSuffix = randomInt();
     const testUser: User = {
-      username: 'testuser',
+      username: 'testuser-' + randomSuffix,
       firstName: 'Test',
       lastName: 'User',
-      email: 'test.user@example.com',
+      email: `test.user.${randomSuffix}@example.com`,
       password: 'test123',
       roles: ['user', 'public'],
     };
@@ -102,7 +118,7 @@ async function main() {
     await fetchUser(testUser.username);
 
     // Delete user
-    console.log('\n--- Deleting user ---');
+    // console.log('\n--- Deleting user ---');
     await deleteUser(testUser.username);
   } catch (error) {
     console.error('Script failed:', error.message);

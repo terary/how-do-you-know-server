@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { TUserRole } from '../types';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
