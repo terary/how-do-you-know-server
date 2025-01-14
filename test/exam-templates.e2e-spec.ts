@@ -199,4 +199,144 @@ describe('ExamTemplatesController (e2e)', () => {
       expect(updateResponse.body.description).toBe('Updated Description');
     });
   });
+
+  describe('GET /exam-templates/:id', () => {
+    it('should get an exam template by id', async () => {
+      // Create test user and get auth token
+      const testUser = await createTestUser(module, 'test-exam-templates');
+      const authToken = await getAuthToken(
+        module,
+        'test-exam-templates@test.com',
+      );
+
+      // Create test institution
+      const institutionResponse = await request(app.getHttpServer())
+        .post('/learning-institutions')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Test Institution - Exam Templates',
+          description: 'Test Institution for Exam Templates',
+          website: 'https://test-institution.com',
+          email: 'test-institution@test.com',
+          phone: '+1234567890',
+        });
+      expect(institutionResponse.status).toBe(201);
+
+      // Create test course
+      const courseResponse = await request(app.getHttpServer())
+        .post('/instructional-courses')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Test Course',
+          description: 'Test Course Description',
+          start_date: '2024-01-01',
+          finish_date: '2024-12-31',
+          start_time_utc: '09:00',
+          duration_minutes: 60,
+          days_of_week: [DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY],
+          instructor_id: testUser.id,
+          created_by: testUser.id,
+          proctor_ids: [testUser.id],
+          institution_id: institutionResponse.body.id,
+          learning_institution_id: institutionResponse.body.id,
+        });
+      expect(courseResponse.status).toBe(201);
+
+      // Create exam template
+      const createResponse = await request(app.getHttpServer())
+        .post('/exam-templates')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Test Exam Template',
+          description: 'Test Description',
+          examExclusivityType: ExamExclusivityType.EXAM_ONLY,
+          availability_start_date: '2024-01-01',
+          availability_end_date: '2024-12-31',
+          course_id: courseResponse.body.id,
+          created_by: testUser.id,
+        });
+      expect(createResponse.status).toBe(201);
+
+      // Get exam template by id
+      const getResponse = await request(app.getHttpServer())
+        .get(`/exam-templates/${createResponse.body.id}`)
+        .set('Authorization', `Bearer ${authToken}`);
+
+      expect(getResponse.status).toBe(200);
+      expect(getResponse.body.id).toBe(createResponse.body.id);
+      expect(getResponse.body.name).toBe('Test Exam Template');
+      expect(getResponse.body.description).toBe('Test Description');
+    });
+  });
+
+  describe('DELETE /exam-templates/:id', () => {
+    it('should delete an exam template', async () => {
+      // Create test user and get auth token
+      const testUser = await createTestUser(module, 'test-exam-templates');
+      const authToken = await getAuthToken(
+        module,
+        'test-exam-templates@test.com',
+      );
+
+      // Create test institution
+      const institutionResponse = await request(app.getHttpServer())
+        .post('/learning-institutions')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Test Institution - Exam Templates',
+          description: 'Test Institution for Exam Templates',
+          website: 'https://test-institution.com',
+          email: 'test-institution@test.com',
+          phone: '+1234567890',
+        });
+      expect(institutionResponse.status).toBe(201);
+
+      // Create test course
+      const courseResponse = await request(app.getHttpServer())
+        .post('/instructional-courses')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Test Course',
+          description: 'Test Course Description',
+          start_date: '2024-01-01',
+          finish_date: '2024-12-31',
+          start_time_utc: '09:00',
+          duration_minutes: 60,
+          days_of_week: [DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY],
+          instructor_id: testUser.id,
+          created_by: testUser.id,
+          proctor_ids: [testUser.id],
+          institution_id: institutionResponse.body.id,
+          learning_institution_id: institutionResponse.body.id,
+        });
+      expect(courseResponse.status).toBe(201);
+
+      // Create exam template
+      const createResponse = await request(app.getHttpServer())
+        .post('/exam-templates')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Test Exam Template',
+          description: 'Test Description',
+          examExclusivityType: ExamExclusivityType.EXAM_ONLY,
+          availability_start_date: '2024-01-01',
+          availability_end_date: '2024-12-31',
+          course_id: courseResponse.body.id,
+          created_by: testUser.id,
+        });
+      expect(createResponse.status).toBe(201);
+
+      // Delete exam template
+      const deleteResponse = await request(app.getHttpServer())
+        .delete(`/exam-templates/${createResponse.body.id}`)
+        .set('Authorization', `Bearer ${authToken}`);
+      expect(deleteResponse.status).toBe(200);
+
+      // Verify exam template is deleted by trying to get it
+      const getResponse = await request(app.getHttpServer())
+        .get(`/exam-templates/${createResponse.body.id}`)
+        .set('Authorization', `Bearer ${authToken}`);
+      expect(getResponse.status).toBe(404);
+    });
+  });
 });
