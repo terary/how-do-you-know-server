@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  ExamTemplate,
-  ExamExclusivityType,
-} from '../../learning/entities/exam-template.entity';
+import { ExamTemplate } from '../../learning/entities/exam-template.entity';
 import { ExamTemplateSection } from '../../learning/entities/exam-template-section.entity';
 import { ExamTemplateSectionQuestion } from '../../learning/entities/exam-template-section-question.entity';
 import { InstructionalCourse } from '../../learning/entities/instructional-course.entity';
@@ -49,39 +46,35 @@ export class ExamTemplateSeeder {
       {
         name: 'Programming Fundamentals Mid-term',
         description: 'Mid-term exam covering basic programming concepts',
-        examExclusivityType: 'exam-only' as ExamExclusivityType,
         availability_start_date: new Date('2024-03-15'),
         availability_end_date: new Date('2024-03-20'),
         course: courses[0],
         created_by: 'f390d9c3-0f0e-49e0-9bac-22bcb3730968',
         sections: [
           {
-            name: 'Multiple Choice',
-            description: 'Basic programming concepts',
-            order_index: 1,
-            time_limit_minutes: 30,
+            title: 'Multiple Choice',
+            instructions: 'Basic programming concepts',
+            position: 1,
+            timeLimitSeconds: 1800, // 30 minutes
             questions: [
               {
                 question_template: questionTemplates[0],
-                order_index: 1,
                 position: 1,
               },
               {
                 question_template: questionTemplates[1],
-                order_index: 2,
                 position: 2,
               },
             ],
           },
           {
-            name: 'True/False',
-            description: 'Programming theory',
-            order_index: 2,
-            time_limit_minutes: 20,
+            title: 'True/False',
+            instructions: 'Programming theory',
+            position: 2,
+            timeLimitSeconds: 1200, // 20 minutes
             questions: [
               {
                 question_template: questionTemplates[2],
-                order_index: 1,
                 position: 1,
               },
             ],
@@ -91,26 +84,23 @@ export class ExamTemplateSeeder {
       {
         name: 'Medical Research Methods Final',
         description: 'Final examination on research methodologies',
-        examExclusivityType: 'exam-practice-both' as ExamExclusivityType,
         availability_start_date: new Date('2024-06-01'),
         availability_end_date: new Date('2024-06-10'),
         course: courses[1],
         created_by: 'f390d9c3-0f0e-49e0-9bac-22bcb3730968',
         sections: [
           {
-            name: 'Research Fundamentals',
-            description: 'Basic research concepts',
-            order_index: 1,
-            time_limit_minutes: 45,
+            title: 'Research Fundamentals',
+            instructions: 'Basic research concepts',
+            position: 1,
+            timeLimitSeconds: 2700, // 45 minutes
             questions: [
               {
                 question_template: questionTemplates[3],
-                order_index: 1,
                 position: 1,
               },
               {
                 question_template: questionTemplates[0],
-                order_index: 2,
                 position: 2,
               },
             ],
@@ -123,20 +113,23 @@ export class ExamTemplateSeeder {
       const existingTemplate = await this.examTemplateRepository.findOne({
         where: {
           name: templateData.name,
-          course: { id: templateData.course.id },
+          course_id: templateData.course.id,
         },
-        relations: ['course'],
       });
 
-      let examTemplate = existingTemplate;
-
+      let template = existingTemplate;
       if (!existingTemplate) {
-        // Create exam template
-        const { sections, ...examData } = templateData;
-        examTemplate = this.examTemplateRepository.create(examData);
-        await this.examTemplateRepository.save(examTemplate);
+        template = await this.examTemplateRepository.save({
+          name: templateData.name,
+          description: templateData.description,
+          course_id: templateData.course.id,
+          created_by: templateData.created_by,
+          availability_start_date: templateData.availability_start_date,
+          availability_end_date: templateData.availability_end_date,
+        });
+
         this.logger.log(
-          `Created exam template: ${examTemplate.name} for ${templateData.course.name}`,
+          `Created exam template: ${template.name} for ${templateData.course.name}`,
         );
       } else {
         this.logger.log(
@@ -148,20 +141,19 @@ export class ExamTemplateSeeder {
       for (const sectionData of templateData.sections) {
         const existingSection = await this.sectionRepository.findOne({
           where: {
-            title: sectionData.name,
-            examTemplate: { id: examTemplate.id },
+            title: sectionData.title,
+            exam_template_id: template.id,
           },
         });
 
         if (!existingSection) {
           const { questions, ...sectionInfo } = sectionData;
           const section = this.sectionRepository.create({
-            ...sectionInfo,
-            title: sectionInfo.name,
-            instructions: sectionInfo.description,
-            position: sectionInfo.order_index,
-            timeLimitSeconds: sectionInfo.time_limit_minutes * 60,
-            examTemplate,
+            title: sectionInfo.title,
+            instructions: sectionInfo.instructions,
+            position: sectionInfo.position,
+            timeLimitSeconds: sectionInfo.timeLimitSeconds,
+            exam_template_id: template.id,
           });
           await this.sectionRepository.save(section);
 
@@ -170,6 +162,7 @@ export class ExamTemplateSeeder {
             const sectionQuestion = this.sectionQuestionRepository.create({
               section_id: section.id,
               question_template_id: questionData.question_template.id,
+              position: questionData.position,
             });
             await this.sectionQuestionRepository.save(sectionQuestion);
           }

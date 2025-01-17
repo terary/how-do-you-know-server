@@ -1,59 +1,41 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
+  IsUUID,
   IsDateString,
-  MinLength,
-  IsEnum,
   IsOptional,
+  IsEnum,
 } from 'class-validator';
 import { ExamExclusivityType } from '../entities/exam-template.entity';
 
 export class UpdateExamTemplateDto {
-  @ApiProperty({
-    description: 'The name of the exam template',
-    example: 'Midterm Exam Template',
-    required: false,
-  })
-  @IsOptional()
+  @ApiProperty({ required: false })
   @IsString()
-  @MinLength(3)
+  @IsOptional()
   name?: string;
 
-  @ApiProperty({
-    description: 'A detailed description of the exam template',
-    example: 'Template for the midterm examination covering chapters 1-5',
-    required: false,
-  })
-  @IsOptional()
+  @ApiProperty({ required: false })
   @IsString()
-  @MinLength(10)
+  @IsOptional()
   description?: string;
 
-  @ApiProperty({
-    description: 'The type of exam exclusivity',
-    enum: ['exam-only', 'practice-only', 'exam-practice-both'],
-    example: 'exam-practice-both',
-    required: false,
-  })
+  @ApiProperty({ required: false })
+  @IsUUID()
   @IsOptional()
-  @IsEnum(['exam-only', 'practice-only', 'exam-practice-both'])
-  examExclusivityType?: ExamExclusivityType;
+  course_id?: string;
 
-  @ApiProperty({
-    description: 'The start date when this exam becomes available',
-    example: '2024-03-15T00:00:00Z',
-    required: false,
-  })
-  @IsOptional()
+  @ApiProperty({ required: false })
   @IsDateString()
+  @IsOptional()
   availability_start_date?: Date;
 
-  @ApiProperty({
-    description: 'The end date when this exam becomes unavailable',
-    example: '2024-03-20T23:59:59Z',
-    required: false,
-  })
-  @IsOptional()
+  @ApiProperty({ required: false })
   @IsDateString()
+  @IsOptional()
   availability_end_date?: Date;
+
+  @ApiProperty({ required: false, enum: ExamExclusivityType })
+  @IsEnum(ExamExclusivityType)
+  @IsOptional()
+  examExclusivityType?: ExamExclusivityType;
 }

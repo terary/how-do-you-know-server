@@ -10,6 +10,12 @@ import { QuestionTemplateValidAnswer } from './question-template-valid-answer.en
 import { QuestionActual } from './question-actual.entity';
 import { TUserPromptType, TUserResponseType } from '../types';
 
+export enum QuestionDifficulty {
+  EASY = 'easy',
+  MEDIUM = 'medium',
+  HARD = 'hard',
+}
+
 @Entity('question_templates')
 export class QuestionTemplate {
   @PrimaryGeneratedColumn('uuid')
@@ -46,6 +52,17 @@ export class QuestionTemplate {
     nullable: true,
   })
   instructionText: string | null;
+
+  @Column({
+    type: 'text',
+    name: 'difficulty',
+    enum: QuestionDifficulty,
+    default: QuestionDifficulty.MEDIUM,
+  })
+  difficulty: QuestionDifficulty;
+
+  @Column('simple-array', { name: 'topics', nullable: true })
+  topics: string[] | null;
 
   @Column('uuid')
   created_by: string;
