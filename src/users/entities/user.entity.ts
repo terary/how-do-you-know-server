@@ -27,7 +27,7 @@ export class User {
   @Column()
   password: string;
 
-  @Column('simple-array')
+  @Column('text', { array: true })
   roles: TUserRole[];
 
   @CreateDateColumn()

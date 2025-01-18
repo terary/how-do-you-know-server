@@ -25,11 +25,11 @@ export class QuestionTemplateSeeder {
   ) {}
 
   async seed() {
-    // Find admin user using raw query since roles is stored as comma-separated string
-    const adminUsers = await this.userRepository.query(
-      `SELECT * FROM "users" WHERE roles LIKE '%admin:exams%' LIMIT 1`,
-    );
-    const adminUser = adminUsers[0];
+    // Find admin user using query builder
+    const adminUser = await this.userRepository
+      .createQueryBuilder('user')
+      .where(':role = ANY(user.roles)', { role: 'admin:exams' })
+      .getOne();
 
     if (!adminUser) {
       throw new Error(

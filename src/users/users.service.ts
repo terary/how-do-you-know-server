@@ -54,10 +54,12 @@ export class UsersService implements OnModuleInit {
 
     const user = this.usersRepository.create({
       ...createUserDto,
-      roles: createUserDto.roles || ['user', 'public'],
+      roles: Array.isArray(createUserDto.roles)
+        ? createUserDto.roles
+        : ['user', 'public'],
     });
 
-    this.logger.debug(`Saving user with roles: ${user.roles.join(', ')}`);
+    this.logger.debug(`Saving user with roles: ${user.roles}`);
     return this.usersRepository.save(user);
   }
 

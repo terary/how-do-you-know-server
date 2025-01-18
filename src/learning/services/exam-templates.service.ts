@@ -35,11 +35,43 @@ export class ExamTemplatesService {
     data: CreateExamTemplateDto,
     userId: string,
   ): Promise<ExamTemplate> {
-    const template = this.examTemplateRepository.create({
-      ...data,
-      created_by: userId,
-    });
-    return this.examTemplateRepository.save(template);
+    console.log(
+      'Creating exam template with data:',
+      JSON.stringify(data, null, 2),
+    );
+    try {
+      const template = this.examTemplateRepository.create({
+        ...data,
+        created_by: userId,
+      });
+      console.log(
+        'Created template object:',
+        JSON.stringify(template, null, 2),
+      );
+
+      // Get the column names from the repository metadata
+      const columns = this.examTemplateRepository.metadata.columns.map(
+        (col) => col.databaseName,
+      );
+      console.log('Available columns in repository:', columns);
+
+      const savedTemplate = await this.examTemplateRepository.save(template);
+      console.log(
+        'Successfully saved template:',
+        JSON.stringify(savedTemplate, null, 2),
+      );
+      return savedTemplate;
+    } catch (error) {
+      console.error('Error creating template:', error);
+      console.error('Error details:', {
+        message: error.message,
+        detail: error.detail,
+        table: error.table,
+        column: error.column,
+        code: error.code,
+      });
+      throw error;
+    }
   }
 
   async findAllTemplates(): Promise<ExamTemplate[]> {
