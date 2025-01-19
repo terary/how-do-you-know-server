@@ -8,6 +8,11 @@ import {
 
 @Entity('questions')
 export class Question {
+  constructor() {
+    this.tags = [];
+    this.options = [];
+  }
+
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
