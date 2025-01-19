@@ -42,44 +42,34 @@ export class InstructionalCourseSeeder {
       return;
     }
 
-    const courses = [
-      {
-        name: 'Introduction to Programming',
-        description: 'Fundamentals of programming using Python',
-        start_date: new Date('2024-02-01'),
-        finish_date: new Date('2024-05-30'),
-        start_time_utc: '14:00',
-        duration_minutes: 90,
+    const totalCourses = 10;
+    const coursesWithTags = Math.floor(totalCourses * 0.8); // 80% will have tags
+
+    const courses = [];
+    for (let i = 0; i < totalCourses; i++) {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() + 7); // Start in a week
+
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 4); // 4-month course
+
+      const course = this.instructionalCourseRepository.create({
+        name: `Course ${i + 1}`,
+        description: `Description for Course ${i + 1}`,
+        start_date: startDate,
+        finish_date: endDate,
+        start_time_utc: '09:00',
+        duration_minutes: 50,
         days_of_week: [DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY],
         institution_id: institutions[0].id,
         instructor_id: adminUser.id,
+        proctor_ids: [],
         created_by: adminUser.id,
-      },
-      {
-        name: 'Medical Research Methods',
-        description: 'Introduction to medical research methodologies',
-        start_date: new Date('2024-03-01'),
-        finish_date: new Date('2024-06-30'),
-        start_time_utc: '15:30',
-        duration_minutes: 120,
-        days_of_week: [DayOfWeek.TUESDAY, DayOfWeek.THURSDAY],
-        institution_id: institutions[1].id,
-        instructor_id: adminUser.id,
-        created_by: adminUser.id,
-      },
-      {
-        name: 'Business Analytics',
-        description: 'Data-driven decision making in business',
-        start_date: new Date('2024-04-01'),
-        finish_date: new Date('2024-07-31'),
-        start_time_utc: '13:00',
-        duration_minutes: 90,
-        days_of_week: [DayOfWeek.MONDAY, DayOfWeek.FRIDAY],
-        institution_id: institutions[2].id,
-        instructor_id: adminUser.id,
-        created_by: adminUser.id,
-      },
-    ];
+        user_defined_tags:
+          i < coursesWithTags ? `courses:tag${i + 1} courses:common` : '',
+      });
+      courses.push(course);
+    }
 
     for (const courseData of courses) {
       const existingCourse = await this.instructionalCourseRepository
@@ -92,10 +82,9 @@ export class InstructionalCourseSeeder {
         .getOne();
 
       if (!existingCourse) {
-        const course = this.instructionalCourseRepository.create(courseData);
-        await this.instructionalCourseRepository.save(course);
+        await this.instructionalCourseRepository.save(courseData);
         this.logger.log(
-          `Created course: ${course.name} at institution ${courseData.institution_id}`,
+          `Created course: ${courseData.name} at institution ${courseData.institution_id}`,
         );
       } else {
         this.logger.log(

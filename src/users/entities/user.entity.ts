@@ -30,6 +30,9 @@ export class User {
   @Column('text', { array: true })
   roles: TUserRole[];
 
+  @Column('text', { default: '' })
+  user_defined_tags: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

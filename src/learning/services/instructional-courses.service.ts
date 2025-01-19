@@ -7,9 +7,10 @@ import { UpdateInstructionalCourseDto } from '../dto/update-instructional-course
 import { InstructionalCourseDto } from '../dto/instructional-course.dto';
 import { LearningInstitution } from '../entities/learning-institution.entity';
 import { User } from '../../users/entities/user.entity';
+import { TaggableService } from '../../common/services/taggable.service';
 
 @Injectable()
-export class InstructionalCoursesService {
+export class InstructionalCoursesService extends TaggableService<InstructionalCourse> {
   constructor(
     @InjectRepository(InstructionalCourse)
     private readonly courseRepository: Repository<InstructionalCourse>,
@@ -17,7 +18,9 @@ export class InstructionalCoursesService {
     private readonly institutionRepository: Repository<LearningInstitution>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) {
+    super(courseRepository);
+  }
 
   async create(
     data: CreateInstructionalCourseDto & { created_by: string },

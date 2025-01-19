@@ -78,4 +78,7 @@ export class QuestionTemplate {
 
   @OneToMany(() => QuestionActual, (actual) => actual.template)
   actuals: QuestionActual[];
+
+  @Column('text', { default: '' })
+  user_defined_tags: string;
 }

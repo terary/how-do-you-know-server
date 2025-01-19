@@ -70,4 +70,7 @@ export class ExamTemplate {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column('text', { default: '' })
+  user_defined_tags: string;
 }

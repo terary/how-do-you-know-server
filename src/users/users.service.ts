@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { UpdateTagsDto } from '../common/dto/update-tags.dto';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -112,5 +113,33 @@ export class UsersService implements OnModuleInit {
 
   async findByUsername(username: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { username } });
+  }
+
+  async updateTags(id: string, updateTagsDto: UpdateTagsDto): Promise<User> {
+    const user = await this.findOne(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.user_defined_tags = updateTagsDto.tags;
+    return this.usersRepository.save(user);
+  }
+
+  async findByTags(tags: string): Promise<User[]> {
+    // Split tags and create a condition that checks if each tag exists in user_defined_tags
+    const tagList = tags.split(' ').filter((tag) => tag.length > 0);
+    if (tagList.length === 0) {
+      return [];
+    }
+
+    // Create a query that checks if any of the tags exist in user_defined_tags
+    const queryBuilder = this.usersRepository.createQueryBuilder('user');
+    tagList.forEach((tag) => {
+      queryBuilder.orWhere('user.user_defined_tags LIKE :tag', {
+        tag: `%${tag}%`,
+      });
+    });
+
+    return queryBuilder.getMany();
   }
 }

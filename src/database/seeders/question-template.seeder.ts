@@ -88,6 +88,7 @@ export class QuestionTemplateSeeder {
         topics: ['music', 'history', 'classical'],
         fodderPool: birthdayPool,
         answers: [{ text: 'January 27, 1756' }],
+        user_defined_tags: 'questions:tag1 questions:common',
       },
       {
         userPromptType: 'text' as TUserPromptType,
@@ -98,6 +99,7 @@ export class QuestionTemplateSeeder {
         difficulty: QuestionDifficulty.EASY,
         topics: ['music', 'history'],
         answers: [{ booleanValue: true }],
+        user_defined_tags: 'questions:tag2 questions:common',
       },
       {
         userPromptType: 'multimedia' as TUserPromptType,
@@ -120,6 +122,7 @@ export class QuestionTemplateSeeder {
           },
         ],
         answers: [{ text: 'Salzburg' }],
+        user_defined_tags: 'questions:tag3 questions:common',
       },
       {
         userPromptType: 'text' as TUserPromptType,
@@ -134,6 +137,7 @@ export class QuestionTemplateSeeder {
           { text: 'Don Giovanni' },
           { text: 'The Marriage of Figaro' },
         ],
+        user_defined_tags: 'questions:tag4 questions:common',
       },
     ];
 
@@ -151,7 +155,11 @@ export class QuestionTemplateSeeder {
       if (!existingTemplate) {
         // Create the template
         const template = await this.questionTemplateRepository.save(
-          this.questionTemplateRepository.create(templateFields),
+          this.questionTemplateRepository.create({
+            ...templateFields,
+            user_defined_tags:
+              templateFields.user_defined_tags || 'questions:common',
+          }),
         );
 
         // Create media if any

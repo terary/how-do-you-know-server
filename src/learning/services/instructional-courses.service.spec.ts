@@ -15,7 +15,7 @@ describe('InstructionalCoursesService', () => {
   let service: InstructionalCoursesService;
   let repository: Repository<InstructionalCourse>;
 
-  const mockInstitution: LearningInstitution = {
+  const mockInstitution = {
     id: '123e4567-e89b-12d3-a456-426614174000',
     name: 'Test University',
     description: 'A test university',
@@ -32,32 +32,34 @@ describe('InstructionalCoursesService', () => {
   const mockInstructor: User = {
     id: 'instructor-id',
     username: 'instructor',
-    firstName: 'Test',
-    lastName: 'Instructor',
-    email: 'instructor@test.com',
-    password: 'password',
-    roles: ['admin:exams' as TUserRole],
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'instructor@example.com',
+    password: 'hashedPassword',
+    roles: ['user'],
     createdAt: new Date(),
     updatedAt: new Date(),
+    user_defined_tags: 'users:instructor users:common',
   };
 
   const mockCourse: InstructionalCourse = {
-    id: '123e4567-e89b-12d3-a456-426614174003',
+    id: 'course-id',
     name: 'Test Course',
-    description: 'A test course',
-    start_date: new Date('2024-02-01'),
-    finish_date: new Date('2024-05-31'),
-    start_time_utc: '14:00',
-    duration_minutes: 90,
+    description: 'Test Description',
+    start_date: new Date(),
+    finish_date: new Date(),
+    start_time_utc: '09:00',
+    duration_minutes: 60,
     days_of_week: [DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY],
     institution_id: mockInstitution.id,
-    institution: mockInstitution,
     instructor_id: mockInstructor.id,
-    instructor: mockInstructor,
-    proctor_ids: ['123e4567-e89b-12d3-a456-426614174004'],
-    created_by: '123e4567-e89b-12d3-a456-426614174001',
+    proctor_ids: [],
+    created_by: mockInstructor.id,
     created_at: new Date(),
     updated_at: new Date(),
+    user_defined_tags: 'courses:test courses:common',
+    institution: mockInstitution,
+    instructor: mockInstructor,
   };
 
   beforeEach(async () => {
@@ -223,14 +225,15 @@ describe('InstructionalCoursesService', () => {
     it('should update course with new instructor', async () => {
       const newInstructor: User = {
         id: 'new-instructor-id',
-        username: 'new_instructor',
-        firstName: 'New',
-        lastName: 'Instructor',
-        email: 'new.instructor@test.com',
-        password: 'password',
-        roles: ['admin:exams' as TUserRole],
+        username: 'new-instructor',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'new.instructor@example.com',
+        password: 'hashedPassword',
+        roles: ['user'],
         createdAt: new Date(),
         updatedAt: new Date(),
+        user_defined_tags: 'users:new-instructor users:common',
       };
 
       const updateDto = {
@@ -290,34 +293,36 @@ describe('InstructionalCoursesService', () => {
         days_of_week: mockCourse.days_of_week,
         institution_id: mockCourse.institution_id,
         instructor_id: mockCourse.instructor_id,
+        instructor: {
+          id: mockInstructor.id,
+          username: mockInstructor.username,
+          firstName: mockInstructor.firstName,
+          lastName: mockInstructor.lastName,
+          email: mockInstructor.email,
+          password: mockInstructor.password,
+          roles: mockInstructor.roles,
+          createdAt: mockInstructor.createdAt,
+          updatedAt: mockInstructor.updatedAt,
+          user_defined_tags: mockInstructor.user_defined_tags,
+        },
+        institution: {
+          id: mockInstitution.id,
+          name: mockInstitution.name,
+          description: mockInstitution.description,
+          website: mockInstitution.website,
+          email: mockInstitution.email,
+          phone: mockInstitution.phone,
+          address: mockInstitution.address,
+          created_by: mockInstitution.created_by,
+          created_at: mockInstitution.created_at,
+          updated_at: mockInstitution.updated_at,
+          courses: [],
+        },
         proctor_ids: mockCourse.proctor_ids,
         created_by: mockCourse.created_by,
         created_at: mockCourse.created_at,
         updated_at: mockCourse.updated_at,
-        institution: {
-          id: mockCourse.institution.id,
-          name: mockCourse.institution.name,
-          description: mockCourse.institution.description,
-          website: mockCourse.institution.website,
-          email: mockCourse.institution.email,
-          phone: mockCourse.institution.phone,
-          address: mockCourse.institution.address,
-          created_by: mockCourse.institution.created_by,
-          created_at: mockCourse.institution.created_at,
-          updated_at: mockCourse.institution.updated_at,
-          courses: [],
-        },
-        instructor: {
-          id: mockCourse.instructor.id,
-          username: mockCourse.instructor.username,
-          firstName: mockCourse.instructor.firstName,
-          lastName: mockCourse.instructor.lastName,
-          email: mockCourse.instructor.email,
-          password: mockCourse.instructor.password,
-          roles: mockCourse.instructor.roles,
-          createdAt: mockCourse.instructor.createdAt,
-          updatedAt: mockCourse.instructor.updatedAt,
-        },
+        user_defined_tags: mockCourse.user_defined_tags,
       });
     });
 
