@@ -343,9 +343,7 @@ export class ExamTemplatesController {
     return this.examTemplatesService.getTemplateHistory(id);
   }
 
-  @Post(':id/preview')
   @ApiOperation({ summary: 'Preview an exam template' })
-  @ApiParam({ name: 'id', description: 'ID of the exam template' })
   @ApiResponse({
     status: 200,
     description: 'Template preview',
@@ -353,6 +351,7 @@ export class ExamTemplatesController {
   @ApiResponse({ status: 400, description: 'Invalid format' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Template not found' })
+  @Post(':id/preview')
   previewTemplate(
     @Param('id') id: string,
     @Body() data: PreviewTemplateDto,

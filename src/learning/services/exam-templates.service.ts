@@ -85,20 +85,60 @@ export class ExamTemplatesService {
   }
 
   async findTemplateById(id: string): Promise<ExamTemplate> {
-    const template = await this.examTemplateRepository.findOne({
-      where: { id },
-      relations: [
-        'sections',
-        'sections.questions',
-        'sections.questions.questionTemplate',
-      ],
-    });
+    try {
+      console.log(`Attempting to find template with id: ${id}`);
 
-    if (!template) {
-      throw new NotFoundException('Exam template not found');
+      const template = await this.examTemplateRepository.findOne({
+        where: { id },
+        relations: [
+          'sections',
+          'sections.questions',
+          'sections.questions.questionTemplate',
+        ],
+        order: {
+          sections: {
+            position: 'ASC',
+            questions: {
+              position: 'ASC',
+            },
+          },
+        },
+      });
+
+      if (!template) {
+        console.log(`No template found with id: ${id}`);
+        throw new NotFoundException('Exam template not found');
+      }
+
+      console.log(`Successfully found template: ${template.id}`);
+      console.log('Template sections:', template.sections?.length || 0);
+      console.log(
+        'Template structure:',
+        JSON.stringify(
+          {
+            id: template.id,
+            name: template.name,
+            sectionsCount: template.sections?.length || 0,
+            sections: template.sections?.map((s) => ({
+              id: s.id,
+              questionsCount: s.questions?.length || 0,
+            })),
+          },
+          null,
+          2,
+        ),
+      );
+
+      return template;
+    } catch (error) {
+      console.error('Error fetching template:', {
+        error: error.message,
+        stack: error.stack,
+        details: error.detail,
+        code: error.code,
+      });
+      throw error;
     }
-
-    return template;
   }
 
   async updateTemplate(
@@ -435,15 +475,11 @@ export class ExamTemplatesService {
 
       section.questions.forEach((question) => {
         // Update difficulty breakdown
-        const difficulty = question.questionTemplate.difficulty;
-        metadata.difficultyBreakdown[difficulty] =
-          (metadata.difficultyBreakdown[difficulty] || 0) + 1;
-
-        // Update topic breakdown
-        question.questionTemplate.topics.forEach((topic) => {
-          metadata.topicBreakdown[topic] =
-            (metadata.topicBreakdown[topic] || 0) + 1;
-        });
+        const difficulty = question.questionTemplate?.difficulty;
+        if (difficulty) {
+          metadata.difficultyBreakdown[difficulty] =
+            (metadata.difficultyBreakdown[difficulty] || 0) + 1;
+        }
       });
     });
 
