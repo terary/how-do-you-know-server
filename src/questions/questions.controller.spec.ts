@@ -148,6 +148,19 @@ describe('QuestionsController', () => {
         data.sectionPosition,
       );
     });
+
+    it('should throw NotFoundException when template not found', async () => {
+      const data = {
+        examType: 'practice' as const,
+        sectionPosition: 1,
+      };
+      jest
+        .spyOn(service, 'generateActual')
+        .mockRejectedValueOnce(new NotFoundException());
+      await expect(controller.generateActual('999', data)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
   });
 
   describe('findActualById', () => {
@@ -185,6 +198,46 @@ describe('QuestionsController', () => {
         mockRequest.user.id,
       );
     });
+
+    it('should throw NotFoundException when template not found', async () => {
+      const updateDto = {
+        userPromptText: 'Updated prompt',
+      };
+      jest
+        .spyOn(service, 'updateTemplate')
+        .mockRejectedValueOnce(new NotFoundException());
+      await expect(
+        controller.updateTemplate('999', updateDto, mockRequest),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should update template with media', async () => {
+      const updateDto = {
+        media: [
+          {
+            mediaContentType: 'image/*' as const,
+            height: 100,
+            width: 100,
+            url: 'https://example.com/image.jpg',
+            specialInstructionText: '',
+            duration: null,
+            fileSize: null,
+            thumbnailUrl: null,
+          },
+        ],
+      };
+      const result = await controller.updateTemplate(
+        '1',
+        updateDto,
+        mockRequest,
+      );
+      expect(result).toEqual(mockTemplate);
+      expect(service.updateTemplate).toHaveBeenCalledWith(
+        '1',
+        updateDto,
+        mockRequest.user.id,
+      );
+    });
   });
 
   describe('searchQuestions', () => {
@@ -193,6 +246,25 @@ describe('QuestionsController', () => {
       const result = await controller.searchQuestions(searchParams);
       expect(result).toEqual([mockTemplate]);
       expect(service.searchQuestions).toHaveBeenCalledWith(searchParams);
+    });
+
+    it('should search questions with multiple filters', async () => {
+      const searchParams = {
+        query: 'sample',
+        userPromptType: 'text' as TUserPromptType,
+        userResponseType: 'multiple-choice-4' as TUserResponseType,
+        exclusivityType: 'exam-practice-both' as const,
+      };
+      const result = await controller.searchQuestions(searchParams);
+      expect(result).toEqual([mockTemplate]);
+      expect(service.searchQuestions).toHaveBeenCalledWith(searchParams);
+    });
+
+    it('should return empty array when no matches found', async () => {
+      jest.spyOn(service, 'searchQuestions').mockResolvedValueOnce([]);
+      const searchParams = { query: 'nonexistent' };
+      const result = await controller.searchQuestions(searchParams);
+      expect(result).toEqual([]);
     });
   });
 });
