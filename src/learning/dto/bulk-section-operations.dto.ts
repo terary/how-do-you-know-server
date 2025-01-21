@@ -10,7 +10,7 @@ import { Type } from 'class-transformer';
 
 export class QuestionPositionDto {
   @ApiProperty()
-  @IsUUID()
+  @IsUUID('4')
   questionId: string;
 
   @ApiProperty()
@@ -20,7 +20,7 @@ export class QuestionPositionDto {
 
 export class BulkAddQuestionsDto {
   @ApiProperty()
-  @IsUUID()
+  @IsUUID('4')
   sectionId: string;
 
   @ApiProperty({ type: [String] })
@@ -32,7 +32,7 @@ export class BulkAddQuestionsDto {
 
 export class BulkRemoveQuestionsDto {
   @ApiProperty()
-  @IsUUID()
+  @IsUUID('4')
   sectionId: string;
 
   @ApiProperty({ type: [String] })
@@ -44,7 +44,7 @@ export class BulkRemoveQuestionsDto {
 
 export class ReorderQuestionsDto {
   @ApiProperty()
-  @IsUUID()
+  @IsUUID('4')
   sectionId: string;
 
   @ApiProperty({ type: [QuestionPositionDto] })

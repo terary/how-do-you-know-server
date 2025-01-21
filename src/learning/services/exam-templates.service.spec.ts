@@ -690,4 +690,81 @@ describe('ExamTemplatesService', () => {
       );
     });
   });
+
+  describe('findSectionById', () => {
+    it('should return a section by id', async () => {
+      jest
+        .spyOn(sectionRepository, 'findOne')
+        .mockResolvedValue(mockTemplate.sections[0] as ExamTemplateSection);
+
+      const result = await service.findSectionById('1');
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe(mockTemplate.sections[0].id);
+    });
+
+    it('should throw NotFoundException when section not found', async () => {
+      jest.spyOn(sectionRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.findSectionById('999')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('updateSection', () => {
+    const updateSectionDto = {
+      title: 'Updated Section',
+      instructions: 'Updated Instructions',
+    };
+
+    it('should update a section', async () => {
+      jest
+        .spyOn(sectionRepository, 'update')
+        .mockResolvedValue({ affected: 1, raw: [], generatedMaps: [] });
+      jest.spyOn(sectionRepository, 'findOne').mockResolvedValue({
+        ...mockTemplate.sections[0],
+        ...updateSectionDto,
+      } as ExamTemplateSection);
+
+      const result = await service.updateSection('1', updateSectionDto);
+
+      expect(result.title).toBe(updateSectionDto.title);
+      expect(result.instructions).toBe(updateSectionDto.instructions);
+    });
+  });
+
+  describe('removeSection', () => {
+    it('should throw NotFoundException when section not found', async () => {
+      jest
+        .spyOn(sectionRepository, 'delete')
+        .mockResolvedValue({ affected: 0, raw: [] });
+
+      await expect(service.removeSection('999')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('removeQuestionFromSection', () => {
+    it('should remove a question from a section', async () => {
+      jest
+        .spyOn(sectionQuestionRepository, 'delete')
+        .mockResolvedValue({ affected: 1, raw: [] });
+
+      await expect(
+        service.removeQuestionFromSection('1', '1'),
+      ).resolves.not.toThrow();
+    });
+
+    it('should throw NotFoundException when question not found in section', async () => {
+      jest
+        .spyOn(sectionQuestionRepository, 'delete')
+        .mockResolvedValue({ affected: 0, raw: [] });
+
+      await expect(
+        service.removeQuestionFromSection('1', '999'),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
 });
