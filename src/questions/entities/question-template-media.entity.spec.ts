@@ -1,42 +1,90 @@
 import { QuestionTemplateMedia } from './question-template-media.entity';
 import { QuestionTemplate } from './question-template.entity';
-import { TMediaContentType } from '../types';
+import { getMetadataArgsStorage } from 'typeorm';
 
 describe('QuestionTemplateMedia', () => {
   let media: QuestionTemplateMedia;
-  const testDate = new Date();
+  let template: QuestionTemplate;
 
   beforeEach(() => {
     media = new QuestionTemplateMedia();
-    media.id = 'test-uuid';
-    media.template_id = 'template-uuid';
-    media.mediaContentType = 'image/jpeg';
-    media.height = 1080;
-    media.width = 1920;
-    media.url = 'https://example.com/image.jpg';
-    media.created_at = testDate;
+    template = new QuestionTemplate();
   });
 
-  it('should create a question template media instance', () => {
+  it('should be defined', () => {
     expect(media).toBeDefined();
-    expect(media instanceof QuestionTemplateMedia).toBeTruthy();
   });
 
-  it('should have all required properties', () => {
-    expect(media).toHaveProperty('id', 'test-uuid');
-    expect(media).toHaveProperty('template_id', 'template-uuid');
-    expect(media).toHaveProperty('mediaContentType', 'image/jpeg');
-    expect(media).toHaveProperty('height', 1080);
-    expect(media).toHaveProperty('width', 1920);
-    expect(media).toHaveProperty('url', 'https://example.com/image.jpg');
-    expect(media).toHaveProperty('created_at', testDate);
+  it('should have all required columns defined in metadata', () => {
+    const metadata = getMetadataArgsStorage();
+    const columns = metadata.columns.filter(
+      (column) => column.target === QuestionTemplateMedia,
+    );
+    const columnNames = columns.map((column) => column.propertyName);
+
+    expect(columnNames).toContain('id');
+    expect(columnNames).toContain('template_id');
+    expect(columnNames).toContain('mediaContentType');
+    expect(columnNames).toContain('height');
+    expect(columnNames).toContain('width');
+    expect(columnNames).toContain('url');
+    expect(columnNames).toContain('specialInstructionText');
+    expect(columnNames).toContain('duration');
+    expect(columnNames).toContain('fileSize');
+    expect(columnNames).toContain('thumbnailUrl');
+    expect(columnNames).toContain('created_at');
   });
 
-  it('should allow null for optional properties', () => {
-    media.specialInstructionText = null;
-    media.duration = null;
-    media.fileSize = null;
-    media.thumbnailUrl = null;
+  it('should have correct property types', () => {
+    expect(media.id).toBeUndefined();
+    expect(media.template_id).toBeUndefined();
+    expect(media.mediaContentType).toBeUndefined();
+    expect(media.height).toBeUndefined();
+    expect(media.width).toBeUndefined();
+    expect(media.url).toBeUndefined();
+    expect(media.specialInstructionText).toBeUndefined();
+    expect(media.duration).toBeUndefined();
+    expect(media.fileSize).toBeUndefined();
+    expect(media.thumbnailUrl).toBeUndefined();
+    expect(media.created_at).toBeUndefined();
+  });
+
+  it('should accept valid values', () => {
+    const now = new Date();
+    Object.assign(media, {
+      id: 'test-id',
+      template_id: 'template-id',
+      mediaContentType: 'image/jpeg',
+      height: 100,
+      width: 200,
+      url: 'https://example.com/image.jpg',
+      specialInstructionText: 'test instruction',
+      duration: 60,
+      fileSize: 1024,
+      thumbnailUrl: 'https://example.com/thumb.jpg',
+      created_at: now,
+    });
+
+    expect(media.id).toBe('test-id');
+    expect(media.template_id).toBe('template-id');
+    expect(media.mediaContentType).toBe('image/jpeg');
+    expect(media.height).toBe(100);
+    expect(media.width).toBe(200);
+    expect(media.url).toBe('https://example.com/image.jpg');
+    expect(media.specialInstructionText).toBe('test instruction');
+    expect(media.duration).toBe(60);
+    expect(media.fileSize).toBe(1024);
+    expect(media.thumbnailUrl).toBe('https://example.com/thumb.jpg');
+    expect(media.created_at).toBe(now);
+  });
+
+  it('should allow null values for nullable fields', () => {
+    Object.assign(media, {
+      specialInstructionText: null,
+      duration: null,
+      fileSize: null,
+      thumbnailUrl: null,
+    });
 
     expect(media.specialInstructionText).toBeNull();
     expect(media.duration).toBeNull();
@@ -44,86 +92,72 @@ describe('QuestionTemplateMedia', () => {
     expect(media.thumbnailUrl).toBeNull();
   });
 
-  it('should accept non-null values for optional properties', () => {
-    media.specialInstructionText = 'Watch carefully';
-    media.duration = 120;
-    media.fileSize = 1024;
-    media.thumbnailUrl = 'https://example.com/thumb.jpg';
+  it('should accept all valid media content types', () => {
+    const validContentTypes = [
+      'application/octet-stream',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml',
+      'image/*',
+      'audio/mpeg',
+      'audio/wav',
+      'audio/ogg',
+      'audio/aac',
+      'audio/webm',
+      'audio/*',
+      'video/mp4',
+      'video/webm',
+      'video/ogg',
+      'video/avi',
+      'video/quicktime',
+      'video/*',
+    ];
 
-    expect(media.specialInstructionText).toBe('Watch carefully');
-    expect(media.duration).toBe(120);
-    expect(media.fileSize).toBe(1024);
-    expect(media.thumbnailUrl).toBe('https://example.com/thumb.jpg');
-  });
-
-  describe('mediaContentType validation', () => {
-    it('should accept valid image content types', () => {
-      const validImageTypes: TMediaContentType[] = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'image/webp',
-        'image/svg+xml',
-        'image/*',
-      ];
-
-      validImageTypes.forEach((type) => {
-        media.mediaContentType = type;
-        expect(media.mediaContentType).toBe(type);
-      });
-    });
-
-    it('should accept valid audio content types', () => {
-      const validAudioTypes: TMediaContentType[] = [
-        'audio/mpeg',
-        'audio/wav',
-        'audio/ogg',
-        'audio/aac',
-        'audio/webm',
-        'audio/*',
-      ];
-
-      validAudioTypes.forEach((type) => {
-        media.mediaContentType = type;
-        expect(media.mediaContentType).toBe(type);
-      });
-    });
-
-    it('should accept valid video content types', () => {
-      const validVideoTypes: TMediaContentType[] = [
-        'video/mp4',
-        'video/webm',
-        'video/ogg',
-        'video/avi',
-        'video/quicktime',
-        'video/*',
-      ];
-
-      validVideoTypes.forEach((type) => {
-        media.mediaContentType = type;
-        expect(media.mediaContentType).toBe(type);
-      });
-    });
-
-    it('should accept application/octet-stream', () => {
-      media.mediaContentType = 'application/octet-stream';
-      expect(media.mediaContentType).toBe('application/octet-stream');
+    validContentTypes.forEach((contentType) => {
+      media.mediaContentType = contentType as any;
+      expect(media.mediaContentType).toBe(contentType);
     });
   });
 
-  it('should have template relationship', () => {
-    const template = new QuestionTemplate();
-    template.id = 'template-uuid';
-    template.userPromptType = 'multimedia';
-    template.userResponseType = 'multiple-choice-4';
-    template.exclusivityType = 'exam-practice-both';
-    template.media = [media];
+  describe('relationships', () => {
+    it('should have ManyToOne relationship with QuestionTemplate', () => {
+      const metadata = getMetadataArgsStorage();
+      const relations = metadata.relations.filter(
+        (relation) => relation.target === QuestionTemplateMedia,
+      );
+      const templateRelation = relations.find(
+        (relation) => relation.propertyName === 'template',
+      );
+      const joinColumns = metadata.joinColumns.filter(
+        (joinColumn) => joinColumn.target === QuestionTemplateMedia,
+      );
+      const templateJoinColumn = joinColumns.find(
+        (joinColumn) => joinColumn.propertyName === 'template',
+      );
 
-    media.template = template;
+      expect(templateRelation).toBeDefined();
+      expect(templateRelation?.relationType).toBe('many-to-one');
+      expect(templateJoinColumn).toBeDefined();
+      expect(templateJoinColumn?.name).toBe('template_id');
 
-    expect(media.template).toBeDefined();
-    expect(media.template instanceof QuestionTemplate).toBeTruthy();
-    expect(media.template_id).toBe(template.id);
-    expect(media.template.media).toContain(media);
+      // Test bidirectional relationship
+      template.media = [media];
+      media.template = template;
+      expect(media.template).toBeDefined();
+      expect(media.template).toBeInstanceOf(QuestionTemplate);
+      expect(template.media).toContain(media);
+
+      // Test relationship type
+      const typeFunction =
+        templateRelation?.type as () => typeof QuestionTemplate;
+      expect(typeFunction()).toBe(QuestionTemplate);
+    });
+
+    it('should initialize relationships as undefined', () => {
+      const freshMedia = new QuestionTemplateMedia();
+      expect(freshMedia.template).toBeUndefined();
+    });
   });
 });

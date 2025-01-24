@@ -20,13 +20,19 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { InstructionalCourse } from '../entities/instructional-course.entity';
+import { TaggableController } from '../../common/controllers/taggable.controller';
 
 @ApiTags('instructional-courses')
 @Controller('instructional-courses')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
-export class InstructionalCoursesController {
-  constructor(private readonly coursesService: InstructionalCoursesService) {}
+export class InstructionalCoursesController extends TaggableController<InstructionalCourse> {
+  constructor(
+    private readonly instructionalCoursesService: InstructionalCoursesService,
+  ) {
+    super(instructionalCoursesService);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new instructional course' })
@@ -39,7 +45,7 @@ export class InstructionalCoursesController {
     @Body() createDto: CreateInstructionalCourseDto,
     @Request() req,
   ): Promise<InstructionalCourseDto> {
-    return this.coursesService.create({
+    return this.instructionalCoursesService.create({
       ...createDto,
       created_by: req.user.id,
     });
@@ -53,7 +59,7 @@ export class InstructionalCoursesController {
     type: [InstructionalCourseDto],
   })
   findAll(): Promise<InstructionalCourseDto[]> {
-    return this.coursesService.findAll();
+    return this.instructionalCoursesService.findAll();
   }
 
   @Get(':id')
@@ -64,7 +70,7 @@ export class InstructionalCoursesController {
     type: InstructionalCourseDto,
   })
   findOne(@Param('id') id: string): Promise<InstructionalCourseDto> {
-    return this.coursesService.findOne(id);
+    return this.instructionalCoursesService.findOne(id);
   }
 
   @Patch(':id')
@@ -78,7 +84,7 @@ export class InstructionalCoursesController {
     @Param('id') id: string,
     @Body() updateDto: UpdateInstructionalCourseDto,
   ): Promise<InstructionalCourseDto> {
-    return this.coursesService.update(id, updateDto);
+    return this.instructionalCoursesService.update(id, updateDto);
   }
 
   @Delete(':id')
@@ -88,6 +94,6 @@ export class InstructionalCoursesController {
     description: 'The instructional course has been deleted',
   })
   remove(@Param('id') id: string): Promise<void> {
-    return this.coursesService.remove(id);
+    return this.instructionalCoursesService.remove(id);
   }
 }

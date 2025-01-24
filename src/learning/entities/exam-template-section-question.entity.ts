@@ -21,6 +21,9 @@ export class ExamTemplateSectionQuestion {
   @Column('uuid')
   question_template_id: string;
 
+  @Column('int', { default: 0 })
+  position: number;
+
   @ManyToOne(() => ExamTemplateSection)
   @JoinColumn({ name: 'section_id' })
   section: ExamTemplateSection;

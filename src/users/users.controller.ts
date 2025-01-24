@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,10 +18,17 @@ import {
   ApiResponse,
   ApiParam,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { UpdateTagsDto } from '../common/dto/update-tags.dto';
+import { User } from './entities/user.entity';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UseGuards } from '@nestjs/common';
 
 @ApiTags('users')
 @Controller('users')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -91,5 +100,37 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found.' })
   remove(@Param('username') username: string) {
     return this.usersService.remove(username);
+  }
+
+  @Put(':id/tags')
+  @ApiOperation({ summary: 'Update user tags' })
+  @ApiResponse({
+    status: 200,
+    description: 'The user tags have been updated',
+    type: User,
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async updateTags(
+    @Param('id') id: string,
+    @Body() updateTagsDto: UpdateTagsDto,
+  ): Promise<User> {
+    return this.usersService.updateTags(id, updateTagsDto);
+  }
+
+  @Get('search/tags')
+  @ApiOperation({ summary: 'Search users by tags' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of users matching the tags',
+    type: [User],
+  })
+  @ApiQuery({
+    name: 'tags',
+    description: 'Space-separated list of tags to search for',
+    required: true,
+    type: String,
+  })
+  async findByTags(@Query('tags') tags: string): Promise<User[]> {
+    return this.usersService.findByTags(tags);
   }
 }

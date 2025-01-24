@@ -7,6 +7,7 @@ import { User } from '../../users/entities/user.entity';
 import { TUserPromptType, TUserResponseType } from '../../questions/types';
 import { QuestionTemplateMedia } from '../../questions/entities/question-template-media.entity';
 import { QuestionTemplateValidAnswer } from '../../questions/entities/question-template-valid-answer.entity';
+import { QuestionDifficulty } from '../../questions/entities/question-template.entity';
 
 @Injectable()
 export class QuestionTemplateSeeder {
@@ -24,11 +25,11 @@ export class QuestionTemplateSeeder {
   ) {}
 
   async seed() {
-    // Find admin user using raw query since roles is stored as comma-separated string
-    const adminUsers = await this.userRepository.query(
-      `SELECT * FROM "users" WHERE roles LIKE '%admin:exams%' LIMIT 1`,
-    );
-    const adminUser = adminUsers[0];
+    // Find admin user using query builder
+    const adminUser = await this.userRepository
+      .createQueryBuilder('user')
+      .where(':role = ANY(user.roles)', { role: 'admin:exams' })
+      .getOne();
 
     if (!adminUser) {
       throw new Error(
@@ -83,8 +84,11 @@ export class QuestionTemplateSeeder {
         exclusivityType: 'exam-practice-both' as const,
         userPromptText: 'When was Wolfgang Amadeus Mozart born?',
         created_by: adminUser.id,
+        difficulty: QuestionDifficulty.MEDIUM,
+        topics: ['music', 'history', 'classical'],
         fodderPool: birthdayPool,
         answers: [{ text: 'January 27, 1756' }],
+        user_defined_tags: 'questions:tag1 questions:common',
       },
       {
         userPromptType: 'text' as TUserPromptType,
@@ -92,7 +96,10 @@ export class QuestionTemplateSeeder {
         exclusivityType: 'practice-only' as const,
         userPromptText: 'Mozart was born in the 18th century.',
         created_by: adminUser.id,
+        difficulty: QuestionDifficulty.EASY,
+        topics: ['music', 'history'],
         answers: [{ booleanValue: true }],
+        user_defined_tags: 'questions:tag2 questions:common',
       },
       {
         userPromptType: 'multimedia' as TUserPromptType,
@@ -101,6 +108,8 @@ export class QuestionTemplateSeeder {
         instructionText:
           "Listen to this musical piece and identify the composer's birthplace.",
         created_by: adminUser.id,
+        difficulty: QuestionDifficulty.HARD,
+        topics: ['music', 'geography'],
         fodderPool: capitalCitiesPool,
         mediaItems: [
           {
@@ -113,6 +122,7 @@ export class QuestionTemplateSeeder {
           },
         ],
         answers: [{ text: 'Salzburg' }],
+        user_defined_tags: 'questions:tag3 questions:common',
       },
       {
         userPromptType: 'text' as TUserPromptType,
@@ -120,16 +130,20 @@ export class QuestionTemplateSeeder {
         exclusivityType: 'exam-practice-both' as const,
         userPromptText: "Name three of Mozart's most famous operas.",
         created_by: adminUser.id,
+        difficulty: QuestionDifficulty.HARD,
+        topics: ['music', 'opera'],
         answers: [
           { text: 'The Magic Flute' },
           { text: 'Don Giovanni' },
           { text: 'The Marriage of Figaro' },
         ],
+        user_defined_tags: 'questions:tag4 questions:common',
       },
     ];
 
     for (const templateData of templates) {
-      const { answers, mediaItems, ...templateFields } = templateData;
+      const { answers, mediaItems, fodderPool, ...templateFields } =
+        templateData;
 
       const existingTemplate = await this.questionTemplateRepository.findOne({
         where: {
@@ -141,7 +155,11 @@ export class QuestionTemplateSeeder {
       if (!existingTemplate) {
         // Create the template
         const template = await this.questionTemplateRepository.save(
-          this.questionTemplateRepository.create(templateFields),
+          this.questionTemplateRepository.create({
+            ...templateFields,
+            user_defined_tags:
+              templateFields.user_defined_tags || 'questions:common',
+          }),
         );
 
         // Create media if any
@@ -150,7 +168,7 @@ export class QuestionTemplateSeeder {
             await this.mediaRepository.save(
               this.mediaRepository.create({
                 ...mediaItem,
-                template,
+                template_id: template.id,
               }),
             );
           }
@@ -161,7 +179,7 @@ export class QuestionTemplateSeeder {
           await this.validAnswerRepository.save(
             this.validAnswerRepository.create({
               ...answer,
-              template,
+              template_id: template.id,
             }),
           );
         }

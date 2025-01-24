@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -6,7 +6,7 @@ import {
   DayOfWeek,
 } from '../../learning/entities/instructional-course.entity';
 import { LearningInstitution } from '../../learning/entities/learning-institution.entity';
-import { Logger } from '@nestjs/common';
+import { User } from '../../users/entities/user.entity';
 
 @Injectable()
 export class InstructionalCourseSeeder {
@@ -14,79 +14,81 @@ export class InstructionalCourseSeeder {
 
   constructor(
     @InjectRepository(InstructionalCourse)
-    private readonly courseRepository: Repository<InstructionalCourse>,
+    private readonly instructionalCourseRepository: Repository<InstructionalCourse>,
     @InjectRepository(LearningInstitution)
-    private readonly institutionRepository: Repository<LearningInstitution>,
+    private readonly learningInstitutionRepository: Repository<LearningInstitution>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async seed() {
     this.logger.log('Starting instructional course seeding...');
 
-    const institutions = await this.institutionRepository.find();
+    // Get admin user
+    const adminUser = await this.userRepository.findOne({
+      where: { username: 'admin' },
+    });
+
+    if (!adminUser) {
+      this.logger.error('Admin user not found. Please run user seeder first.');
+      return;
+    }
+
+    const institutions = await this.learningInstitutionRepository.find();
     if (institutions.length === 0) {
       this.logger.warn(
-        'No institutions found. Please run institution seeder first.',
+        'No learning institutions found. Please run learning institution seeder first.',
       );
       return;
     }
 
-    const courses = [
-      {
-        name: 'Introduction to Programming',
-        description: 'Fundamentals of programming using Python',
-        start_date: new Date('2024-02-01'),
-        finish_date: new Date('2024-05-30'),
-        start_time_utc: '14:00',
-        duration_minutes: 90,
+    const totalCourses = 10;
+    const coursesWithTags = Math.floor(totalCourses * 0.8); // 80% will have tags
+
+    const courses = [];
+    for (let i = 0; i < totalCourses; i++) {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() + 7); // Start in a week
+
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + 4); // 4-month course
+
+      const course = this.instructionalCourseRepository.create({
+        name: `Course ${i + 1}`,
+        description: `Description for Course ${i + 1}`,
+        start_date: startDate,
+        finish_date: endDate,
+        start_time_utc: '09:00',
+        duration_minutes: 50,
         days_of_week: [DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY],
-        institution: institutions[0], // University of Technology
-        created_by: 'f390d9c3-0f0e-49e0-9bac-22bcb3730968', // admin user id
-        instructor_id: 'f390d9c3-0f0e-49e0-9bac-22bcb3730968', // admin user as instructor
-      },
-      {
-        name: 'Advanced Medical Research',
-        description: 'Research methodologies in medical science',
-        start_date: new Date('2024-02-01'),
-        finish_date: new Date('2024-06-15'),
-        start_time_utc: '15:30',
-        duration_minutes: 120,
-        days_of_week: [DayOfWeek.TUESDAY, DayOfWeek.THURSDAY],
-        institution: institutions[1], // Medical Sciences Academy
-        created_by: 'f390d9c3-0f0e-49e0-9bac-22bcb3730968',
-        instructor_id: 'f390d9c3-0f0e-49e0-9bac-22bcb3730968',
-      },
-      {
-        name: 'Business Strategy',
-        description: 'Strategic management and business planning',
-        start_date: new Date('2024-02-15'),
-        finish_date: new Date('2024-05-15'),
-        start_time_utc: '13:00',
-        duration_minutes: 90,
-        days_of_week: [DayOfWeek.MONDAY, DayOfWeek.FRIDAY],
-        institution: institutions[2], // Business School International
-        created_by: 'f390d9c3-0f0e-49e0-9bac-22bcb3730968',
-        instructor_id: 'f390d9c3-0f0e-49e0-9bac-22bcb3730968',
-      },
-    ];
+        institution_id: institutions[0].id,
+        instructor_id: adminUser.id,
+        proctor_ids: [],
+        created_by: adminUser.id,
+        user_defined_tags:
+          i < coursesWithTags ? `courses:tag${i + 1} courses:common` : '',
+      });
+      courses.push(course);
+    }
 
     for (const courseData of courses) {
-      const existingCourse = await this.courseRepository.findOne({
-        where: {
-          name: courseData.name,
-          institution: { id: courseData.institution.id },
-        },
-        relations: ['institution'],
-      });
+      const existingCourse = await this.instructionalCourseRepository
+        .createQueryBuilder('course')
+        .leftJoinAndSelect('course.institution', 'institution')
+        .where('course.name = :name', { name: courseData.name })
+        .andWhere('institution.id = :institutionId', {
+          institutionId: courseData.institution_id,
+        })
+        .getOne();
 
       if (!existingCourse) {
-        const course = this.courseRepository.create(courseData);
-        await this.courseRepository.save(course);
+        await this.instructionalCourseRepository.save(courseData);
         this.logger.log(
-          `Created course: ${course.name} at ${courseData.institution.name}`,
+          `Created course: ${courseData.name} at institution ${courseData.institution_id}`,
         );
       } else {
         this.logger.log(
-          `Course already exists: ${existingCourse.name} at ${existingCourse.institution.name}`,
+          `Course already exists: ${existingCourse.name} at institution ${courseData.institution_id}`,
         );
       }
     }

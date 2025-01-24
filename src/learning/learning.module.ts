@@ -14,6 +14,7 @@ import { ExamTemplatesService } from './services/exam-templates.service';
 import { ExamTemplateSectionsController } from './controllers/exam-template-sections.controller';
 import { ExamTemplateSectionsService } from './services/exam-template-sections.service';
 import { User } from '../users/entities/user.entity';
+import { ExamTemplateValidationService } from './services/exam-template-validation.service';
 
 @Module({
   imports: [
@@ -37,6 +38,8 @@ import { User } from '../users/entities/user.entity';
     InstructionalCoursesService,
     ExamTemplatesService,
     ExamTemplateSectionsService,
+    ExamTemplateValidationService,
   ],
+  exports: [ExamTemplatesService, ExamTemplateValidationService],
 })
 export class LearningModule {}

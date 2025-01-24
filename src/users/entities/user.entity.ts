@@ -27,8 +27,11 @@ export class User {
   @Column()
   password: string;
 
-  @Column('simple-array')
+  @Column('text', { array: true })
   roles: TUserRole[];
+
+  @Column('text', { default: '' })
+  user_defined_tags: string;
 
   @CreateDateColumn()
   createdAt: Date;

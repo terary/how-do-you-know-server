@@ -1,51 +1,80 @@
 import { FodderItem } from './fodder-item.entity';
 import { FodderPool } from './fodder-pool.entity';
+import { getMetadataArgsStorage } from 'typeorm';
 
 describe('FodderItem', () => {
   let fodderItem: FodderItem;
-  const testDate = new Date();
 
   beforeEach(() => {
     fodderItem = new FodderItem();
-    fodderItem.id = 'test-uuid';
-    fodderItem.pool_id = 'pool-uuid';
-    fodderItem.text = 'Test item text';
-    fodderItem.created_by = 'user-uuid';
-    fodderItem.created_at = testDate;
   });
 
-  it('should create a fodder item instance', () => {
+  it('should be defined', () => {
     expect(fodderItem).toBeDefined();
-    expect(fodderItem instanceof FodderItem).toBeTruthy();
   });
 
-  it('should have all required properties', () => {
-    expect(fodderItem).toHaveProperty('id', 'test-uuid');
-    expect(fodderItem).toHaveProperty('pool_id', 'pool-uuid');
-    expect(fodderItem).toHaveProperty('text', 'Test item text');
-    expect(fodderItem).toHaveProperty('created_by', 'user-uuid');
-    expect(fodderItem).toHaveProperty('created_at', testDate);
+  it('should have all required columns defined in metadata', () => {
+    const metadata = getMetadataArgsStorage();
+    const columns = metadata.columns.filter(
+      (column) => column.target === FodderItem,
+    );
+    const columnNames = columns.map((column) => column.propertyName);
+
+    expect(columnNames).toContain('id');
+    expect(columnNames).toContain('pool_id');
+    expect(columnNames).toContain('text');
+    expect(columnNames).toContain('created_by');
+    expect(columnNames).toContain('created_at');
   });
 
-  it('should have a pool relationship property', () => {
-    const pool = new FodderPool();
-    pool.id = 'pool-uuid';
-    pool.name = 'Test Pool';
-
-    fodderItem.pool = pool;
-
-    expect(fodderItem.pool).toBeDefined();
-    expect(fodderItem.pool instanceof FodderPool).toBeTruthy();
-    expect(fodderItem.pool.id).toBe('pool-uuid');
-    expect(fodderItem.pool.name).toBe('Test Pool');
+  it('should initialize with undefined properties', () => {
+    expect(fodderItem.id).toBeUndefined();
+    expect(fodderItem.pool_id).toBeUndefined();
+    expect(fodderItem.text).toBeUndefined();
+    expect(fodderItem.created_by).toBeUndefined();
+    expect(fodderItem.created_at).toBeUndefined();
+    expect(fodderItem.pool).toBeUndefined();
   });
 
-  it('should match the pool_id with the related pool id', () => {
-    const pool = new FodderPool();
-    pool.id = 'pool-uuid';
+  it('should accept valid values', () => {
+    fodderItem.id = 'test-id';
+    fodderItem.pool_id = 'test-pool-id';
+    fodderItem.text = 'test text';
+    fodderItem.created_by = 'test-user';
+    fodderItem.created_at = new Date();
 
-    fodderItem.pool = pool;
+    expect(fodderItem.id).toBe('test-id');
+    expect(fodderItem.pool_id).toBe('test-pool-id');
+    expect(fodderItem.text).toBe('test text');
+    expect(fodderItem.created_by).toBe('test-user');
+    expect(fodderItem.created_at).toBeInstanceOf(Date);
+  });
 
-    expect(fodderItem.pool_id).toBe(fodderItem.pool.id);
+  describe('relationships', () => {
+    it('should have ManyToOne relationship with FodderPool', () => {
+      const metadata = getMetadataArgsStorage();
+      const poolRelation = metadata.relations.find(
+        (rel) => rel.target === FodderItem && rel.propertyName === 'pool',
+      );
+
+      expect(poolRelation).toBeDefined();
+      const typeFunction = poolRelation?.type as () => typeof FodderPool;
+      expect(typeFunction()).toBe(FodderPool);
+      expect(poolRelation?.relationType).toBe('many-to-one');
+      expect(typeof poolRelation?.inverseSideProperty).toBe('function');
+    });
+
+    it('should handle relationship assignment', () => {
+      const pool = new FodderPool();
+      pool.id = 'test-pool-id';
+      pool.name = 'Test Pool';
+      pool.description = 'Test Description';
+
+      fodderItem.pool_id = pool.id;
+      fodderItem.pool = pool;
+
+      expect(fodderItem.pool).toBe(pool);
+      expect(fodderItem.pool_id).toBe(pool.id);
+    });
   });
 });

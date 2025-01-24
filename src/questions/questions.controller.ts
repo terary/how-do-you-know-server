@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { QuestionsService } from './questions.service';
@@ -265,6 +266,28 @@ class UpdateTemplateDto {
   validAnswers?: ValidAnswerDto[];
 }
 
+class SearchQuestionsDto {
+  @ApiProperty({ description: 'Search query', required: false })
+  @IsString()
+  @IsOptional()
+  query?: string;
+
+  @ApiProperty({ description: 'Filter by user prompt type', required: false })
+  @IsEnum(['text', 'multimedia'])
+  @IsOptional()
+  userPromptType?: TUserPromptType;
+
+  @ApiProperty({ description: 'Filter by user response type', required: false })
+  @IsEnum(['free-text-255', 'multiple-choice-4', 'true-false'])
+  @IsOptional()
+  userResponseType?: TUserResponseType;
+
+  @ApiProperty({ description: 'Filter by exclusivity type', required: false })
+  @IsEnum(['exam-only', 'practice-only', 'exam-practice-both'])
+  @IsOptional()
+  exclusivityType?: 'exam-only' | 'practice-only' | 'exam-practice-both';
+}
+
 @ApiTags('questions')
 @Controller('questions')
 @UseGuards(JwtAuthGuard)
@@ -367,5 +390,18 @@ export class QuestionsController {
     @Request() req,
   ): Promise<QuestionTemplate> {
     return this.questionsService.updateTemplate(id, data, req.user.id);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Search and filter questions' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns filtered question templates',
+    type: [QuestionTemplate],
+  })
+  async searchQuestions(
+    @Query() searchParams: SearchQuestionsDto,
+  ): Promise<QuestionTemplate[]> {
+    return this.questionsService.searchQuestions(searchParams);
   }
 }

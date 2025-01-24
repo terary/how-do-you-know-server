@@ -9,6 +9,11 @@ import { DevDebugModule } from './dev-debug/dev-debug.module';
 import { QuestionsModule } from './questions/questions.module';
 import { FodderPoolsModule } from './questions/fodder-pools.module';
 import { LearningModule } from './learning/learning.module';
+import { ExamInstancesController } from './learning/controllers/exam-instances.controller';
+import { ExamInstancesService } from './learning/services/exam-instances.service';
+import { ExamInstance } from './learning/entities/exam-instance.entity';
+import { ExamInstanceSection } from './learning/entities/exam-instance-section.entity';
+import { ExamInstanceQuestion } from './learning/entities/exam-instance-question.entity';
 
 @Module({
   imports: [
@@ -21,7 +26,7 @@ import { LearningModule } from './learning/learning.module';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
     }),
     UsersModule,
     AuthModule,
@@ -29,8 +34,13 @@ import { LearningModule } from './learning/learning.module';
     QuestionsModule,
     FodderPoolsModule,
     LearningModule,
+    TypeOrmModule.forFeature([
+      ExamInstance,
+      ExamInstanceSection,
+      ExamInstanceQuestion,
+    ]),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, ExamInstancesController],
+  providers: [AppService, ExamInstancesService],
 })
 export class AppModule {}

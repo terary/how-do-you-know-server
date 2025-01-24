@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like, In } from 'typeorm';
 import {
   QuestionTemplate,
   QuestionTemplateMedia,
@@ -10,6 +10,7 @@ import {
   QuestionActualValidAnswer,
 } from './entities';
 import { TUserPromptType, TUserResponseType, TMediaContentType } from './types';
+import { SearchQuestionsDto } from './dto/search-questions.dto';
 
 type CreateTemplateData = {
   userPromptType: TUserPromptType;
@@ -224,5 +225,62 @@ export class QuestionsService {
     }
 
     return this.findTemplateById(savedTemplate.id);
+  }
+
+  async searchQuestions(
+    searchParams: SearchQuestionsDto,
+  ): Promise<QuestionTemplate[]> {
+    const queryBuilder = this.templateRepository.createQueryBuilder('question');
+
+    if (searchParams.searchTerm) {
+      queryBuilder.andWhere(
+        '(question.userPromptText ILIKE :searchTerm OR question.instructionText ILIKE :searchTerm)',
+        { searchTerm: `%${searchParams.searchTerm}%` },
+      );
+    }
+
+    if (searchParams.difficulty) {
+      queryBuilder.andWhere('question.difficulty = :difficulty', {
+        difficulty: searchParams.difficulty,
+      });
+    }
+
+    if (searchParams.topics && searchParams.topics.length > 0) {
+      queryBuilder.andWhere('question.topics && :topics', {
+        topics: searchParams.topics,
+      });
+    }
+
+    if (searchParams.userPromptType) {
+      queryBuilder.andWhere('question.userPromptType = :userPromptType', {
+        userPromptType: searchParams.userPromptType,
+      });
+    }
+
+    if (searchParams.userResponseType) {
+      queryBuilder.andWhere('question.userResponseType = :userResponseType', {
+        userResponseType: searchParams.userResponseType,
+      });
+    }
+
+    if (searchParams.courseId) {
+      queryBuilder
+        .innerJoin(
+          'exam_template_section_questions',
+          'etq',
+          'etq.question_template_id = question.id',
+        )
+        .innerJoin('exam_template_sections', 'ets', 'ets.id = etq.section_id')
+        .innerJoin('exam_templates', 'et', 'et.id = ets.exam_template_id')
+        .andWhere('et.course_id = :courseId', {
+          courseId: searchParams.courseId,
+        });
+    }
+
+    return queryBuilder
+      .leftJoinAndSelect('question.media', 'media')
+      .leftJoinAndSelect('question.validAnswers', 'validAnswers')
+      .orderBy('question.created_at', 'DESC')
+      .getMany();
   }
 }

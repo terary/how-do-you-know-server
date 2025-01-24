@@ -29,6 +29,16 @@ import {
   AddQuestionToSectionDto,
   RemoveQuestionFromSectionDto,
 } from '../dto/exam-template-section-question.dto';
+import {
+  BulkAddQuestionsDto,
+  BulkRemoveQuestionsDto,
+  ReorderQuestionsDto,
+} from '../dto/bulk-section-operations.dto';
+import {
+  PreviewFormat,
+  PreviewResponse,
+  PreviewTemplateDto,
+} from '../dto/preview-template.dto';
 
 @ApiTags('exam-templates')
 @Controller('exam-templates')
@@ -43,7 +53,6 @@ export class ExamTemplatesController {
   @ApiResponse({
     status: 201,
     description: 'The exam template has been created',
-    type: ExamTemplate,
   })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -59,7 +68,6 @@ export class ExamTemplatesController {
   @ApiResponse({
     status: 200,
     description: 'List of exam templates',
-    type: [ExamTemplate],
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAllTemplates(): Promise<ExamTemplate[]> {
@@ -72,7 +80,6 @@ export class ExamTemplatesController {
   @ApiResponse({
     status: 200,
     description: 'The exam template',
-    type: ExamTemplate,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Exam template not found' })
@@ -86,7 +93,6 @@ export class ExamTemplatesController {
   @ApiResponse({
     status: 200,
     description: 'The exam template has been updated',
-    type: ExamTemplate,
   })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -117,7 +123,6 @@ export class ExamTemplatesController {
   @ApiResponse({
     status: 201,
     description: 'The section has been created',
-    type: ExamTemplateSection,
   })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -133,7 +138,6 @@ export class ExamTemplatesController {
   @ApiResponse({
     status: 200,
     description: 'The section',
-    type: ExamTemplateSection,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Section not found' })
@@ -147,7 +151,6 @@ export class ExamTemplatesController {
   @ApiResponse({
     status: 200,
     description: 'The section has been updated',
-    type: ExamTemplateSection,
   })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -176,7 +179,6 @@ export class ExamTemplatesController {
   @ApiResponse({
     status: 201,
     description: 'The question has been added to the section',
-    type: ExamTemplateSectionQuestion,
   })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -214,7 +216,6 @@ export class ExamTemplatesController {
   @ApiResponse({
     status: 200,
     description: 'List of questions in the section',
-    type: [ExamTemplateSectionQuestion],
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Section not found' })
@@ -222,5 +223,139 @@ export class ExamTemplatesController {
     @Param('id') id: string,
   ): Promise<ExamTemplateSectionQuestion[]> {
     return this.examTemplatesService.getQuestionsForSection(id);
+  }
+
+  @Post('sections/:id/questions/bulk')
+  @ApiOperation({ summary: 'Add multiple questions to a section' })
+  @ApiParam({ name: 'id', description: 'ID of the exam template section' })
+  @ApiResponse({
+    status: 201,
+    description: 'The questions have been added to the section',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Section not found' })
+  bulkAddQuestionsToSection(
+    @Param('id') id: string,
+    @Body() data: BulkAddQuestionsDto,
+  ): Promise<ExamTemplateSection> {
+    return this.examTemplatesService.bulkAddQuestionsToSection(
+      id,
+      data.questionIds,
+    );
+  }
+
+  @Delete('sections/:id/questions/bulk')
+  @ApiOperation({ summary: 'Remove multiple questions from a section' })
+  @ApiParam({ name: 'id', description: 'ID of the exam template section' })
+  @ApiResponse({
+    status: 200,
+    description: 'The questions have been removed from the section',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Section not found' })
+  bulkRemoveQuestionsFromSection(
+    @Param('id') id: string,
+    @Body() data: BulkRemoveQuestionsDto,
+  ): Promise<void> {
+    return this.examTemplatesService.bulkRemoveQuestionsFromSection(
+      id,
+      data.questionIds,
+    );
+  }
+
+  @Put('sections/:id/questions/reorder')
+  @ApiOperation({ summary: 'Reorder questions within a section' })
+  @ApiParam({ name: 'id', description: 'ID of the exam template section' })
+  @ApiResponse({
+    status: 200,
+    description: 'The questions have been reordered',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Section not found' })
+  reorderSectionQuestions(
+    @Param('id') id: string,
+    @Body() data: ReorderQuestionsDto,
+  ): Promise<ExamTemplateSection> {
+    return this.examTemplatesService.reorderSectionQuestions(
+      id,
+      data.questionPositions,
+    );
+  }
+
+  @Post(':id/validate')
+  @ApiOperation({ summary: 'Validate an exam template' })
+  @ApiParam({ name: 'id', description: 'ID of the exam template' })
+  @ApiResponse({
+    status: 200,
+    description: 'The template is valid',
+  })
+  @ApiResponse({ status: 400, description: 'Template validation failed' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Template not found' })
+  async validateTemplate(@Param('id') id: string): Promise<void> {
+    await this.examTemplatesService.validateTemplate(id);
+  }
+
+  @Post(':id/versions')
+  @ApiOperation({ summary: 'Create a new version of an exam template' })
+  @ApiParam({ name: 'id', description: 'ID of the exam template' })
+  @ApiResponse({
+    status: 201,
+    description: 'New version created',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Template not found' })
+  createNewVersion(
+    @Param('id') id: string,
+    @Request() req,
+  ): Promise<ExamTemplate> {
+    return this.examTemplatesService.createNewVersion(id, req.user.id);
+  }
+
+  @Post(':id/publish')
+  @ApiOperation({ summary: 'Publish an exam template' })
+  @ApiParam({ name: 'id', description: 'ID of the exam template' })
+  @ApiResponse({
+    status: 200,
+    description: 'Template published',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid template' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Template not found' })
+  publishTemplate(@Param('id') id: string): Promise<ExamTemplate> {
+    return this.examTemplatesService.publishTemplate(id);
+  }
+
+  @Get(':id/history')
+  @ApiOperation({ summary: 'Get version history of an exam template' })
+  @ApiParam({ name: 'id', description: 'ID of the exam template' })
+  @ApiResponse({
+    status: 200,
+    description: 'Template version history',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Template not found' })
+  getTemplateHistory(@Param('id') id: string): Promise<ExamTemplate[]> {
+    return this.examTemplatesService.getTemplateHistory(id);
+  }
+
+  @ApiOperation({ summary: 'Preview an exam template' })
+  @ApiResponse({
+    status: 200,
+    description: 'Template preview',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid format' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Template not found' })
+  @Post(':id/preview')
+  previewTemplate(
+    @Param('id') id: string,
+    @Body() data: PreviewTemplateDto,
+  ): Promise<PreviewResponse> {
+    return this.examTemplatesService.previewTemplate(id, data.format);
   }
 }

@@ -71,4 +71,7 @@ export class InstructionalCourse {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @Column('text', { default: '' })
+  user_defined_tags: string;
 }
